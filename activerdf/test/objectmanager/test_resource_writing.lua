@@ -10,7 +10,7 @@ function setup()
 end
 
 function test_update_value()
-	Namespace.register('a'r, 'http://activerdf.org/test/')
+	Namespace.register('ar', 'http://activerdf.org/test/')
 	local adapter = get_write_adapter()
 
 	local eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
@@ -18,7 +18,7 @@ function test_update_value()
 
 	eyal.ar.age = 100
 	assert ( 100 == eyal.ar.age )
-	assert ( activerdf.table.equals ( { 100 }, eyal.all_ar.age 
+	assert ( activerdf.table.equals ( { 100 }, eyal.all_ar.age ) )
 
 	eyal.ar.age = { 100, 80 }
 	assert ( activerdf.table.equals ( { 100, 80 }, eyal.ar.age ) )
