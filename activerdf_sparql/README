@@ -1,0 +1,33 @@
+Lua ActiveRDF SPARQL adapter
+(http://activerdf.luaforge.net/)
+
+This is the Lua ActiveRDF adapter to a SPARQL endpoint serving RDF.
+
+Lua ActiveRDF SPARQL adapter is distributed as a Lua module.
+
+Lua ActiveRDF SPARQL adapter is free software and uses the same license as Lua 5.1.
+
+Current version is 0.1. It was developed for Lua 5.1.
+
+Download
+
+Lua ActiveRDF SPARQL adapter source can be downloaded from its Lua Forge page:
+http://luaforge.net/frs/?group_id=370
+
+Dependencies
+
+Lua ActiveRDF SPARQL adapter depends on five modules:
+	* Lua ActiveRDF 0.1	
+	* LuaSocket 2.0.1
+	* LTN12 1.0.1
+	* JSON4Lua 0.9.20
+	* LPeg 0.8
+	 
+History
+
+Version 0.1 [10/Apr/2008]
+
+Installing
+
+Authors
+	* Mauricio Henrique de Souza Bomfim
