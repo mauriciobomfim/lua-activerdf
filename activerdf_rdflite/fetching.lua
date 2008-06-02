@@ -1,34 +1,42 @@
-# Author:: Eyal Oren
-# Copyright:: (c) 2005-2006 Eyal Oren
-# License:: LGPL
+-- FetchingAdapter is an extension to rdflite for fetching RDF from online sources.
+require 'activerdf'
 
-# FetchingAdapter is an extension to rdflite for fetching RDF from online sources.
-class FetchingAdapter < RDFLite
-  ConnectionPool.register_adapter(:fetching, self)
+local ConnectionPool = activerdf.ConnectionPool
+local string = activerdf.string
+local execute = os.execute
+local RDFS = activerdf.RDFS
+local oo = activerdf.oo
 
-	# TODO: check that rapper is installed
+module "activerdf_rdflite"
 
-	# fetches RDF/XML data from given url and adds it to the datastore, using the 
-	# source url as context identifier.
-  def fetch url
-    # check if url starts with http://
-		return unless url.match(/http:\/\/(.*)/)
+FetchingAdapter = oo.class({}, RDFLite)
 
-		$activerdflog.debug "fetching from #{url}"
+ConnectionPool.register_adapter('fetching', 'FetchingAdapter')
 
-		#model = Redland::Model.new
-		#parser = Redland::Parser.new('rdfxml')
-		#scan = Redland::Uri.new('http://feature.librdf.org/raptor-scanForRDF')
-		#enable = Redland::Literal.new('1')
-		#Redland::librdf_parser_set_feature(parser, scan.uri, enable.node)
-		#parser.parse_into_model(model, url)
-		#triples = Redland::Serializer.ntriples.model_to_string(nil, model)
+	-- TODO: check that rapper is installed
 
-		triples = `rapper --scan --quiet "#{url}"`
-		lines = triples.split($/)
-		$activerdflog.debug "found #{lines.size} triples"
-
-		context = RDFS::Resource.new(url)
-		add_ntriples(triples, context)
-  end
+	-- fetches RDF/XML data from given url and adds it to the datastore, using the 
+	-- source url as context identifier.
+function FetchingAdapter:fetch ( url )
+    -- check if url starts with http://
+    if not url:match('http:\/\/(.*)') then
+    	return nil
+    end
+	
+	-- $activerdflog.debug "fetching from #{url}"
+	
+	--model = Redland::Model.new
+	--parser = Redland::Parser.new('rdfxml')
+	--scan = Redland::Uri.new('http://feature.librdf.org/raptor-scanForRDF')
+	--enable = Redland::Literal.new('1')
+	--Redland::librdf_parser_set_feature(parser, scan.uri, enable.node)
+	--parser.parse_into_model(model, url)
+	--triples = Redland::Serializer.ntriples.model_to_string(nil, model)
+	
+	local triples = os.execute('rapper --scan --quiet "'..url..'"')
+	local lines = string.split( triples, '\n' )
+	-- $activerdflog.debug "found #{lines.size} triples"
+	
+	local context = RDFS.Resource( url )
+	return self:add_ntriples(triples, context)
 end

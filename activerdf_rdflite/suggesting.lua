@@ -1,87 +1,107 @@
-# Author:: Eyal Oren
-# Copyright:: (c) 2005-2006 Eyal Oren
-# License:: LGPL
+-- The SuggestingAdapter is an extension to rdflite that can recommand
+-- additional predicates for a given resource, based on usage statistics in the
+-- whole dataset. E.g. given a dataset with FOAF data, one can ask a suggestion
+-- for a person and get a recommendation for this person to also use
+-- foaf:birthday. You can use this adapter in any collaborative editing setting:
+-- it leads the community to converge on terminology (everybody will use the
+-- same foaf:birthday to define somebody's birthday).
+require 'activerdf'
 
-# The SuggestingAdapter is an extension to rdflite that can recommand
-# additional predicates for a given resource, based on usage statistics in the
-# whole dataset. E.g. given a dataset with FOAF data, one can ask a suggestion
-# for a person and get a recommendation for this person to also use
-# foaf:birthday. You can use this adapter in any collaborative editing setting:
-# it leads the community to converge on terminology (everybody will use the
-# same foaf:birthday to define somebody's birthday).
-class SuggestingAdapter < FetchingAdapter
-  ConnectionPool.register_adapter(:suggesting,self)
+local ConnectionPool = activerdf.ConnectionPool
+local string = activerdf.string
+local execute = os.execute
+local time = os.time
+local RDFS = activerdf.RDFS
+local table = activerdf.table
+local oo = activerdf.oo
 
-	alias _old_initialize initialize
+module "activerdf_rdflite"
+
+SuggestingAdapter = oo.class({}, FetchingAdapter)
+
+ConnectionPool.register_adapter( 'suggesting', SuggestingAdapter )
+
+local _old_initialize = __init
 	
-	# initialises the adapter, see RDFLite for description of possible parameters.
-	def initialize params
-		_old_initialize(params)
-		@db.execute('drop view if exists occurrence')
-		@db.execute('create view occurrence as select p, count(distinct s) as count from triple group by p')
+-- initialises the adapter, see RDFLite for description of possible parameters.
+function SuggestingAdapter:__init(params)
+	_old_initialize(params)
+	db.execute('drop view if exists occurrence')
+	db.execute('create view occurrence as select p, count(distinct s) as count from triple group by p')
 
-		@db.execute('drop view if exists cooccurrence')
-		@db.execute('create view cooccurrence as select t0.p as p1,t1.p as p2, count(distinct t0.s) as count from triple as t0 join triple as t1 on t0.s=t1.s and t0.p!=t1.p group by t0.p, t1.p')
-	end
-
-  # suggests additional predicates that might be applicable for the given resource
-	def suggest(resource)
-		$activerdflog.debug "starting suggestions for #{size} triples"
-		time = Time.now
-
-    predicates = []
-		own_predicates = resource.direct_predicates
-
-		construct_occurrence_matrix
-		construct_cooccurrence_matrix
-
-		own_predicates.each do |p|
-			predicates << p if occurrence(p) > 1
-		end
-
-		# fetch all predicates co-occurring with our predicates
-		candidates = predicates.collect {|p| cooccurring(p) }
-		return nil if candidates.empty?
-
-		# perform set intersection
-		candidates = candidates.inject {|intersect, n| intersect & n }.flatten
-		candidates = candidates - own_predicates
-
-		suggestions = candidates.collect do |candidate|
-			score = predicates.inject(1.0) do |score, p|
-				score * cooccurrence(candidate, p) / occurrence(p)
-			end
-			[candidate, score]
-		end
-		$activerdflog.debug "suggestions for #{resource} took #{Time.now-time}s"
-		suggestions
-	end
-
-	private
-	def construct_occurrence_matrix
-		@occurrence = {}
-		@db.execute('select * from occurrence where count > 1') do |p,count|
-			@occurrence[parse(p)] = count.to_i
-		end
-	end
-
-	def construct_cooccurrence_matrix
-		@cooccurrence = {}
-		@db.execute('select * from cooccurrence') do |p1, p2, count|
-			@cooccurrence[parse(p1)] ||= {}
-			@cooccurrence[parse(p1)][parse(p2)] = count.to_i
-		end
-	end
-
-	def occurrence(predicate)
-		@occurrence[predicate] || 0
-	end
-
-	def cooccurrence(p1, p2)
-		@cooccurrence[p1][p2] || 0
-	end
-
-	def cooccurring(predicate)
-		@cooccurrence[predicate].keys
-	end
+	db.execute('drop view if exists cooccurrence')
+	db.execute('create view cooccurrence as select t0.p as p1,t1.p as p2, count(distinct t0.s) as count from triple as t0 join triple as t1 on t0.s=t1.s and t0.p!=t1.p group by t0.p, t1.p')
 end
+
+  -- suggests additional predicates that might be applicable for the given resource
+function SuggestingAdapter:suggest(resource)
+	-- $activerdflog.debug "starting suggestions for #{size} triples"
+	local time = time()
+
+	local predicates = {}
+	local own_predicates = resource:direct_predicates()
+
+	construct_occurrence_matrix()
+	construct_cooccurrence_matrix()
+
+	table.foreach ( own_predicates, function ( i, p )
+		if occurrence(p) > 1 then
+			table.insert( predicates , p )
+		end 
+	end)
+
+	-- fetch all predicates co-occurring with our predicates
+	local candidates = table.map ( predicates, function ( i, p ) return cooccurring(p) end )
+	
+	if table.empty ( candidates ) then
+		return nil
+	end 
+
+	-- perform set intersection
+	
+	candidates = table.flatten( table.inject( candidates, function( intersec, n ) return table.intersection(intersec, n) end ) )
+	candidates = table.difference(candidates, own_predicates)
+
+	local suggestions = table.map ( candidates, function ( i, candidate )
+		local score = table.inject(1.0, predicates, function ( score, p )
+			return score * cooccurrence(candidate, p) / occurrence(p)
+		end)
+		return { candidate, score }
+	end)
+	-- $activerdflog.debug "suggestions for #{resource} took #{Time.now-time}s"
+	return suggestions
+end
+
+	-- private
+	local function construct_occurrence_matrix(self)
+		self.occurrence = {}
+		local row = {}
+		local cur = self.db:execute('select * from occurrence where count > 1')		
+		while cur:fetch(row, 'a') do
+			self.occurrence[parse(row.p)] = tonumber(row.count)
+		end
+		cur:close()
+	end
+	
+	local function construct_cooccurrence_matrix(self)
+		self.cooccurrence = {}
+		local row = {}
+		local cur = self.db:execute('select * from cooccurrence')
+		
+		while cur:fetch(row, 'a') do
+			self.cooccurrence[parse(row.p1)] = self.cooccurrence[parse(row.p1)] or {}
+			self.cooccurrence[parse(row.p1)][parse(row.p2)] = tonumber(row.count)
+		end
+	end
+
+	local function occurrence(self, predicate)
+		return self.occurrence[predicate] or 0
+	end
+
+	local function cooccurrence(self, p1, p2)
+		return self.cooccurrence[p1][p2] or 0
+	end
+
+	local function cooccurring(self, predicate)
+		return table.keys ( self.cooccurrence[predicate] )
+	end

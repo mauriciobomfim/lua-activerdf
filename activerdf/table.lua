@@ -5,6 +5,7 @@ local table = table
 local type = type
 local unpack = unpack
 local print = print
+local next = next
 
 module "activerdf.table"
 
@@ -22,6 +23,67 @@ index = function(tbl, value)
 		end)
 	end
 	return t[value]
+end
+
+intersection = function (a,b)
+ 	
+	local Set = {}
+    
+    function Set.new (t)
+      local set = {}
+      for _, l in ipairs(t) do set[l] = true end
+      return set
+    end
+    
+    local set_a = Set.new(a)
+    local set_b = Set.new(b)
+    
+    function Set.intersection (a,b)
+      local res = Set.new{}
+      for k in pairs(a) do
+        res[k] = b[k]
+      end
+      return res
+    end
+ 	
+ 	local res = {}
+ 	local int = Set.intersection(set_a,set_b)
+ 	
+ 	foreach(int, function(i,v) insert(res, i) end)
+ 	
+ 	return res
+ 	 	    
+end
+
+difference = function (a, b)
+	return reject(a, function(i,v) return include(b, v) end)
+end
+
+inject = function (init, t, func)	
+	local actual_pos
+	local next_pos
+	local acc
+	local func = func
+	local t = t
+	
+	if type(func) == "function" then
+		acc = init
+		next_pos = next(t)
+	else
+		func = t
+		t = init		
+		actual_pos = next(t)
+		next_pos = next(t, actual_pos)
+		acc = t[actual_pos]		
+	end
+	
+	while t[next_pos] do
+		acc = func(acc, t[next_pos])
+		actual_pos = next_pos
+		next_pos = next(t, actual_pos)
+	end
+	
+	return acc
 end
 
 equals = function(tbl1, tbl2)	

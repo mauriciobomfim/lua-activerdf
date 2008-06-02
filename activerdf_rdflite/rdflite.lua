@@ -31,41 +31,6 @@ local ConnectionPool = activerdf.ConnectionPool
 --	@@have_ferret = false
 --end
 
--- private
--- constants for extracting resources/literals from sql results
-local SPOC = {'s','p','o','c'}
-
------------------------------------------------------------------------------
--- Prepares a SQL statement using placeholders.
--- Extracted from http://sputnik.freewisdom.org
------------------------------------------------------------------------------
-local function prepare(statement, ...)
-	local count = select('#', ...)
-
-	if count > 0 then
-		local someBindings = {}
-
-		for index = 1, count do
-			local value = select(index, ...)
-			local type = type(value)
-
-			if type == 'string' then
-				value = '\'' .. value:gsub('\'', '\'\'') .. '\''
-			elseif type == 'nil' then
-				value = 'null'
-			else
-				value = tostring(value)
-			end
-
-			someBindings[index] = value
-		end
-
-		statement = statement:format(unpack(someBindings))
-	end
-
-	return statement
-end
-
 
 -- RDFLite is a lightweight RDF database on top of sqlite3. It can act as adapter 
 -- in ActiveRDF. It supports on-disk and in-memory usage, and allows keyword 
@@ -84,6 +49,7 @@ ConnectionPool.register_adapter('rdflite', RDFLite)
 -- * :location => filepath (defaults to memory)
 -- * :keyword => true/false (defaults to false)
 -- * :pidx, :oidx, etc. => true/false (enable/disable these indices)
+
 function RDFLite:__init(params)
 	local params = params or {}
 	
@@ -672,3 +638,35 @@ end
 
 local Resource = re.compile ( [[ '<' { [^>]* } '>' ]] )
 local Literal = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ]]  )
+local SPOC = {'s','p','o','c'}
+
+-----------------------------------------------------------------------------
+-- Prepares a SQL statement using placeholders.
+-- Extracted from http://sputnik.freewisdom.org
+-----------------------------------------------------------------------------
+local function prepare(statement, ...)
+	local count = select('#', ...)
+
+	if count > 0 then
+		local someBindings = {}
+
+		for index = 1, count do
+			local value = select(index, ...)
+			local type = type(value)
+
+			if type == 'string' then
+				value = '\'' .. value:gsub('\'', '\'\'') .. '\''
+			elseif type == 'nil' then
+				value = 'null'
+			else
+				value = tostring(value)
+			end
+
+			someBindings[index] = value
+		end
+
+		statement = statement:format(unpack(someBindings))
+	end
+
+	return statement
+end
