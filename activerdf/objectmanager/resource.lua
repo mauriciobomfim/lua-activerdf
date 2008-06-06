@@ -9,6 +9,7 @@ local unpack = unpack
 local tostring = tostring
 local getmetatable = getmetatable
 local setmetatable = setmetatable
+local rawequal = rawequal
 
 module "activerdf"
 
@@ -78,19 +79,19 @@ function Resource:abbreviation()
 end
 
  -- a resource is same as another if they both represent the same uri
-function Resource:__eq(other)		
+function Resource:__eq(other)
 	local self_uri
 	local other_uri
 	if oo.instanceof(self, RDFS.Resource) then
 		self_uri = self.uri
-	elseif self == RDFS.Resource or oo.subclassof(self, RDFS.Resource) then
+	elseif rawequal(self,RDFS.Resource) or oo.subclassof(self, RDFS.Resource) then
 		self_uri = self:uri()
 	end
 	if oo.instanceof(other, RDFS.Resource) then
 		other_uri = other.uri
-	elseif other == RDFS.Resource or oo.subclassof(other, RDFS.Resource) then
+	elseif rawequal(other,RDFS.Resource) or oo.subclassof(other, RDFS.Resource) then
 		other_uri = other:uri()
-	end
+	end	
 	return other_uri and (other_uri == self_uri) or false			
 end
 
@@ -116,21 +117,21 @@ end
 
 
 function Resource:to_xml()
-	local base = string.chop(Namespace.expand(Namespace.prefix(self),''))
+	local base = string.chop(Namespace.expand(Namespace.prefix(self),''))	
 	local xml = '<?xml version="1.0"?>\n'
 	xml = xml .. '<rdf:RDF xmlns="' .. base .. '#"\n'
-	table.foreach(Namespace.abbreviations, function(i, p) 
+	table.foreach(Namespace.abbreviations(), function(i, p) 
 															uri = Namespace.expand(p,'')
 															if uri ~= base .. '#' then
 																xml = xml .. '  xmlns:' .. tostring(p)..'="'..uri..'"\n'
 															end															
-														end)
+														end)	
 	xml = xml .. '  xml:base="'..base..'">\n'
-	xml = xml .. '<rdf:Description rdf:about="#'..self:localname()..'">\n'
+	xml = xml .. '<rdf:Description rdf:about="#'..self:localname()..'">\n'	
 	table.foreach(self:direct_predicates(), function(i, p)
-		objects = Query():distinct('?o'):where(self, p, '?o'):execute()
-		table.foreach(objects, function(i, obj)
-			prefix, localname = Namespace.prefix(p), Namespace.localname(p)
+		objects = Query():distinct('?o'):where(self, p, '?o'):execute()		
+		table.foreach(objects, function(i, obj)			
+			prefix, localname = Namespace.prefix(p), Namespace.localname(p)			
 			if prefix then
 				pred_xml = string.format('%s:%s', prefix, localname)
 			else
@@ -145,8 +146,8 @@ function Resource:to_xml()
          end
 		end)
 	end)	      
-   xml = xml .. '</rdf:Description>\n'
-   xml = xml .. '</rdf:RDF>'
+   	xml = xml .. '</rdf:Description>\n'
+   	xml = xml .. '</rdf:RDF>'
 	return xml
 end
 
@@ -166,7 +167,7 @@ end
 -- predicates for this resource)
 function Resource._predicates()
 	local domain = Namespace.lookup('rdfs', 'domain')
-	return Query():distinct('?p').where('?p', domain, class_uri).execute() or {}
+	return Query():distinct('?p'):where('?p', domain, class_uri):execute() or {}
 end
 
 -- returns array of all instances of this class (e.g. Person.find_all)
@@ -489,7 +490,8 @@ function Resource:direct_predicates(distinct)
 	local distinct = distinct == nil and true or distinct
 	local q
 	if distinct then		
-		return Query():distinct('?p'):where(self, '?p', '?o'):execute()
+		q = Query():distinct('?p'):where(self, '?p', '?o'):execute()		
+		return q
 	else		
 		return Query():select('?p'):where(self, '?p', '?o'):execute()
 	end

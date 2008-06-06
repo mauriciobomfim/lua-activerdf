@@ -56,9 +56,9 @@ end
 
 -- Adds variables to select distinct clause
 function Query:distinct(...)
-	local s = {...}
+	local s = {...}	
 	self._distinct = true
-	if s[1] then
+	if s[1] then		
 		return self:select(unpack(s))
 	else
 		return self._distinct

@@ -108,13 +108,14 @@ function ObjectManager.construct_class(resource)
 		-- if so, return the existing class				
 		return _module[klassname]
 	else
-      --$activerdflog.debug "ObjectManager: construct_class: creating given class #{klassname}"
+      	--$activerdflog.debug "ObjectManager: construct_class: creating given class #{klassname}"
 		-- otherwise: create it, inside that module, as subclass of RDFS::Resource
 		-- (using toplevel Class.new to prevent RDFS::Class.new from being called)		
 		_module[klassname] = oo.class({}, RDFS.Resource)				
 		local klass = _module[klassname]		
 		klass.class_uri = resource
-		getmetatable(getmetatable(klass)).__index = RDFS.Resource.send		
+		getmetatable(getmetatable(klass)).__index = RDFS.Resource.send
+		getmetatable(klass).__eq = RDFS.Resource.__eq	
 		return klass
 	end
 end

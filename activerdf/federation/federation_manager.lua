@@ -1,4 +1,3 @@
-local print = print
 local type = type
 local error = error
 
@@ -47,19 +46,19 @@ function FederationManager.query(q, options, block)
 	-- and yield them consequtively
 	if type(block) == 'function' then
 		table.foreach(ConnectionPool.read_adapters(), function(index, source)
-			--check that if is correct: source:query(q) do |*clauses|
-			table.foreach(source:query(q), function(index, clauses)
+			--check that if is correct: source:query(q) do |*clauses|			
+			table.foreach(source:query(q), function(index, clauses)								
 				block(unpack(clauses))
 			end)
 		end)
 	else
 		table.foreach(ConnectionPool.read_adapters(), function(index, source)
-			local source_results = source:query(q)			
+			local source_results = source:query(q)
 			table.foreach(source_results, function(index, clauses)
 				table.insert(results, clauses)
 			end)
 		end)
-		
+				
 		-- filter the empty results
 		results = table.reject(results, function(index, ary) return table.empty(ary) end)
 		
@@ -69,8 +68,7 @@ function FederationManager.query(q, options, block)
 		-- but they cannot check duplicates against each other)
 		if q._distinct then 
 			results = table.uniq(results)
-		end
-		
+		end		
 		-- flatten results array if only one select clause
 		-- to prevent unnecessarily nested array [[eyal],[renaud],...]
 		if #q.select_clauses == 1 or q._ask then									

@@ -4,7 +4,6 @@ local tonumber = tonumber
 local oldstring = string
 local string = activerdf.string
 local activerdf = activerdf
-local print = print
 local getmetatable = getmetatable
 local setmetatable = setmetatable
 
@@ -35,7 +34,7 @@ function Literal.typed(value, _type)
 	--DateTime.parse(value)
 	elseif _type == XSD.boolean then
 		return value == 'true' or value == 1
-	elseif type == XSD.integer then
+	elseif _type == XSD.integer then		
 		return tonumber(value)
 	end
 end

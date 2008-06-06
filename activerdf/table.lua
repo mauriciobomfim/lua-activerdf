@@ -6,6 +6,7 @@ local type = type
 local unpack = unpack
 local print = print
 local next = next
+local getmetatable = getmetatable
 
 module "activerdf.table"
 
@@ -173,15 +174,16 @@ function reject(self, func, ...)
 	return R
 end
 
-function __flatten(t,f,complete)
-	for _,v in ipairs(t) do	
+
+function __flatten(t,f,complete)	
+	for _,v in pairs(t) do			
 		if type(v) == "table" then		
-			 if (complete or type(v[1]) == "table") then
+			 if (complete or type(v[1]) == "table") then			 	  
 				  __flatten(v,f,complete)				  				  
 			 else
-				  f[#f+1] = v				  
+				  f[#f+1] = v
 			 end
-		else			
+		else
 			 f[#f+1] = v
 		end
 	end
@@ -190,9 +192,8 @@ end
 function flatten(t)
   local f = { }
   __flatten(t,f,true)  
-  return t
+  return f
 end
-
 
 function dup(tbl)
 	local t = {}

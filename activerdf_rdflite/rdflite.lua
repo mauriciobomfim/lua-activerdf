@@ -1,6 +1,7 @@
-require 'luasql.sqlite3'
 require 'activerdf'
 require 'activerdf.queryengine.ntriples_parser'
+
+local luasql = require 'luasql.sqlite3'
 
 local oo = activerdf.oo
 local table = activerdf.table
@@ -13,6 +14,13 @@ local NTriplesParser = activerdf.NTriplesParser
 local Namespace = activerdf.Namespace
 local Query = activerdf.Query
 local ConnectionPool = activerdf.ConnectionPool
+local io = io
+local string = string
+local type = type
+local unpack = unpack
+local error = error
+local tonumber = tonumber
+local print = print
 
 --require 'federation/connection_pool'
 --require 'uuidtools'
@@ -31,11 +39,45 @@ local ConnectionPool = activerdf.ConnectionPool
 --	@@have_ferret = false
 --end
 
+local Resource = re.compile ( [[ '<' { [^>]* } '>' ]] )
+local Literal = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ]]  )
+local SPOC = {'s','p','o','c'}
+
+-----------------------------------------------------------------------------
+-- Prepares a SQL statement using placeholders.
+-- Extracted from http://sputnik.freewisdom.org
+-----------------------------------------------------------------------------
+local function prepare(statement, ...)
+	local count = select('#', ...)
+
+	if count > 0 then
+		local someBindings = {}
+
+		for index = 1, count do
+			local value = select(index, ...)
+			local type = type(value)
+
+			if type == 'string' then
+				value = '\'' .. value:gsub('\'', '\'\'') .. '\''
+			elseif type == 'nil' then
+				value = 'null'
+			else
+				value = tostring(value)
+			end
+
+			someBindings[index] = value
+		end
+		
+		statement = statement:format(unpack(someBindings))
+	end
+
+	return statement
+end
+
 
 -- RDFLite is a lightweight RDF database on top of sqlite3. It can act as adapter 
 -- in ActiveRDF. It supports on-disk and in-memory usage, and allows keyword 
 -- search if ferret is installed.
-
 module "activerdf_rdflite"
 
 RDFLite = oo.class({}, ActiveRdfAdapter)
@@ -59,6 +101,7 @@ function RDFLite:__init(params)
 	local file = params['location'] or ':memory:'
 	local dbenv = luasql.sqlite3()
 	local db = dbenv:connect(file)
+	db:setautocommit(false)
 	
 	-- disable keyword search by default, enable only if ferret is found
 	local keyword_search = params['keyword'] == nil and false or params['keyword']
@@ -98,8 +141,9 @@ function RDFLite:__init(params)
 
 	-- create triples table. ignores duplicated triples
 	db:execute('create table if not exists triple(s,p,o,c, unique(s,p,o,c) on conflict ignore)')
+	db:commit()
 
-	create_indices(params)
+	obj:create_indices(params)
 	--@db
 	return obj
 end
@@ -163,7 +207,7 @@ function RDFLite:delete(s, p, o, c)
 		ds = ds.." where "..table.concat ( where_clauses, ' and ' )
 	end
 
-	local pds = prepare(ds, conditions)
+	local pds = prepare(ds, unpack(conditions))
 	
 	-- execute delete string with possible deletion conditions (for each 
 	-- non-empty where clause)
@@ -232,36 +276,40 @@ function RDFLite:load(location)
 	  raise ActiveRdfError, "cannot parse remote rdf/xml file without Redland: please install Redland (librdf.org) and its Ruby bindings"
 	end
  else]]--
-	local file = io.open (location , 'r')
-	local data = file:read('*a')
-	file:close()
-	self:add_ntriples(data, context)
+	local file, err = io.open (location , 'r')	
+	if file then
+		local data = file:read('*a')
+		file:close()
+		return self:add_ntriples(data, context)
+	else
+		error(err)
+	end	
  --end
 end
 
 -- adds ntriples from given context into datastore
 function RDFLite:add_ntriples(ntriples, context)
-	-- add each triple to db
-	self.db:setautocommit(false)
+	-- add each triple to db	
 	local insert
 	local subject, predicate, object
 	local s, p, o
-	
 	local ntriples = NTriplesParser.parse(ntriples)
+	
 	table.foreachi(ntriples, function(i,v)
-		s, p, o = v[1], v[2], v[3]
-		-- convert triples into internal db format
-		subject, predicate, object = table.map({s,p,o}, function(i,r) return self:internalise(r) end)
-
+		s, p, o = v[1], v[2], v[3]		
+		-- convert triples into internal db format		
+		subject, predicate, object = unpack(table.map({s,p,o}, function(i,r) return self:internalise(r) end))
+		
 		-- insert triple into database
 		insert = prepare('insert into triple values (%s,%s,%s,%s);', subject, predicate, object, context)
-		self.db:execute(insert)
-
+		
+		self.db:execute(insert)		
 		-- if keyword-search available, insert the object into keyword search
 		-- @ferret << {:subject => subject, :object => object} if keyword_search?
 	end)
 
 	self.db:commit()
+	
 	return self.db
 end
 
@@ -269,15 +317,21 @@ end
 function RDFLite:query(query)
 	-- construct query clauses
 	local sql, conditions = self:translate(query)
-
+		
 	-- executing query, passing all where-clause values as parameters (so that 
 	-- sqlite will encode quotes correctly)
-	
+		
 	local row = {}
 	local results = {}	
-	local cur = self.db:execute(prepare(sql, conditions))
-	while cur:fetch(row, 'a') do
-		table.insert(results, row)
+		
+	local cur, err = self.db:execute(prepare(sql, unpack(conditions)))	
+	
+	if cur then
+		while cur:fetch(row) do
+			table.insert(results, row)			
+		end
+	else
+		error(err)
 	end
 	
 	-- if ASK query, we check whether we received a positive result count
@@ -287,28 +341,28 @@ function RDFLite:query(query)
 		return {{tonumber(results[1][1])}}
 	else
 		-- otherwise we convert results to ActiveRDF nodes and return them
-		return wrap(query, results)
+		return self:wrap(query, results)
 	end
 end
 
 -- translates ActiveRDF query into internal sqlite query string
 function RDFLite:translate(query)
-	local where, conditions = construct_where(query)
-	return { construct_select(query) .. construct_join(query) .. where .. construct_sort(query) .. construct_limit(query), conditions } 
+	local where, conditions = self:construct_where(query)
+	return self:construct_select(query) .. self:construct_join(query) .. where .. self:construct_sort(query) .. self:construct_limit(query), conditions 
 end
 
 -- private
 -- construct select clause
-local function construct_select(query)
+function RDFLite:construct_select(query)
 	-- ASK queries counts the results, and return true if results > 0
 	if query:ask() then
 		return "select count(*)"
 	end
 
 	-- add select terms for each selectclause in the query
-	-- the term names depend on the join conditions, e.g. t0.s or t1.p
+	-- the term names depend on the join conditions, e.g. t1.s or t2.p
 	local select = table.map ( query.select_clauses, function (i,term)
-		return variable_name(query, term)
+		return self:variable_name(query, term)
 	end)
 
 	-- add possible distinct and count functions to select clause
@@ -325,7 +379,7 @@ local function construct_select(query)
 end
 
 -- construct (optional) limit and offset clauses
-local function construct_limit(query)
+function RDFLite:construct_limit(query)
 	local clause = ""
 
 	-- if no limit given, use limit -1 (no limit)
@@ -339,13 +393,13 @@ local function construct_limit(query)
 end
 
 -- sort query results on variable clause (optionally)
-local function construct_sort(query)
+function RDFLite:construct_sort(query)
 	local sort
 	if not table.empty(query.sort_clauses) then
-		sort = table.map(query.sort_clauses, function(i,term) return variable_name(query, term) end)
+		sort = table.map(query.sort_clauses, function(i,term) return self:variable_name(query, term) end)
 		return " order by ("..table.concat(sort,',')..")"
 	elseif not table.empty(query.reverse_sort_clauses) then
-		sort = table.map(query.reverse_sort_clauses, function (i,term) return  variable_name(query, term) end)
+		sort = table.map(query.reverse_sort_clauses, function (i,term) return  self:variable_name(query, term) end)
 		return " order by ("..table.concat(sort',')..") DESC"
 	else
 		return ""
@@ -357,12 +411,12 @@ end
 -- only, and we should only alias tables we didnt alias yet)
 -- we should only look for one join clause in each where-clause: when we find 
 -- one, we skip the rest of the variables in this clause.
-local function construct_join(query)
+function RDFLite:construct_join(query)
 	local join_stmt = ''
 
 	-- no join necessary if only one where clause given
 	if table.getn(query.where_clauses) == 1 then
-		return ' from triple as t0 '
+		return ' from triple as t1 '
 	end
 
 	local where_clauses = table.flatten(query.where_clauses)
@@ -393,8 +447,8 @@ local function construct_join(query)
 			next ( where_clauses, index )
 		end
 		
-		-- construct t0,t1,... as aliases for term
-		-- and construct join condition, e.g. t0.s
+		-- construct t1,t2,... as aliases for term
+		-- and construct join condition, e.g. t1.s
 		local termalias = "t"..( index / 4 )
 		local termjoin = termalias.."."..SPOC[ math.fmod ( index, 4 ) ]
 
@@ -411,16 +465,16 @@ local function construct_join(query)
 				next (indices, ind)
 			end
 			
-			-- construct t0,t1, etc. as aliases for buddy,
-			-- and construct join condition, e.g. t0.s = t1.p
+			-- construct t1,t2, etc. as aliases for buddy,
+			-- and construct join condition, e.g. t1.s = t2.p
 			local buddyalias = "t"..( i / 4 )
 			local buddyjoin = buddyalias.."."..SPOC[ math.fmod ( i, 4 ) ]
 
 			-- TODO: fix reuse of same table names as aliases, e.g.
-			-- "from triple as t1 join triple as t2 on ... join t1 on ..."
+			-- "from triple as t2 join triple as t3 on ... join t2 on ..."
 			-- is not allowed as such by sqlite
 			-- but on the other hand, restating the aliases gives ambiguity:
-			-- "from triple as t1 join triple as t2 on ... join triple as t1 ..."
+			-- "from triple as t2 join triple as t3 on ... join triple as t2 ..."
 			-- is ambiguous
 			if join_stmt:find ( buddyalias ) then
 				join = join .. "and "..termjoin.." = "..buddyjoin
@@ -436,14 +490,14 @@ local function construct_join(query)
 	end)
 
 	if join_stmt == '' then
-		return " from triple as t0 "
+		return " from triple as t1 "
 	else
 		return " from "..join_stmt.." "
 	end
 end
 
 	-- construct where clause
-local function construct_where(query)
+function RDFLite:construct_where(query)	
 	-- collecting where clauses, these will be added to the sql string later
 	local where = {}
 	local conditions
@@ -454,18 +508,18 @@ local function construct_where(query)
 	local right_hand_sides = {}
 
 	-- convert each where clause to SQL:
-	-- add where clause for each subclause, except if it's a variable
-	table.foreach ( query.where_clauses, function ( level, clause )
+	-- add where clause for each subclause, except if it's a variable		
+	table.foreach ( query.where_clauses, function ( level, clause )		
 		-- raise ActiveRdfError, "where clause #{clause} is not a triple" unless clause.is_a?(Array)
 		if not type(clause) == 'table' then
 			error ( "where clause "..clause.." is not a triple" )
 		end
 		table.foreach ( clause, function ( i, subclause )
-			-- dont add where clause for variables
-			if not ( subclause:find('^?') or subclause == nil ) then
-				conditions = compute_where_condition( i, subclause, query.reasoning and reasoning ) -- olhar o reasoning da classe rdflite
+			-- dont add where clause for variables			
+			if not ( tostring(subclause):find('^?') or subclause == nil ) then
+				conditions = self:compute_where_condition( i, subclause, query.reasoning and self.reasoning )
 				if table.getn(conditions) == 1 then
-					table.insert ( where , "t"..level.."."..SPOC[i].." = ?" )
+					table.insert ( where , "t"..level.."."..SPOC[i].." = %s" )
 					table.insert ( right_hand_sides , conditions[1] )
 				else
 					conditions = table.map ( conditions, function (i,c) return "'"..c.."'" end )
@@ -495,13 +549,13 @@ local function construct_where(query)
 	end
 
 	if table.empty ( where ) then
-		return { '', {} }		
+		return '', {}		
 	else
-		return { "where " .. table.concat ( where, ' and '), right_hand_sides }
+		return "where " .. table.concat ( where, ' and '), right_hand_sides
 	end
 end
 
-local function compute_where_condition(index, subclause, reasoning)
+function RDFLite:compute_where_condition(index, subclause, reasoning)
 	local conditions = { subclause }
 
 	-- expand conditions with rdfs rules if reasoning enabled
@@ -511,7 +565,7 @@ local function compute_where_condition(index, subclause, reasoning)
 		elseif index == 2 then
 			-- expand properties to include all subproperties
 			if subclause['uri'] then			
-				conditions = subproperties(subclause)
+				conditions = self:subproperties(subclause)
 			end			
 		elseif index == 3 then
 			-- no rule for objects
@@ -524,26 +578,26 @@ local function compute_where_condition(index, subclause, reasoning)
 	return table.map ( conditions, function ( i, c ) return ( c['uri'] and "<"..c.uri..">" or tostring(c) ) end )
 end
 
-function subproperties(resource)
+function RDFLite:subproperties(self, resource)
 	-- compute and store subproperties of this resource 
 	-- or use earlier computed value if available
-	if not subprops[resource] then
+	if not self.subprops[resource] then
 		local subproperty = Namespace.lookup( 'rdfs', 'subPropertyOf' )
 		local children_query = Query():distinct('?sub'):where('?sub', subproperty, resource)
 		children_query.reasoning = false
 		local children = children_query:execute()
 
 		if table.empty ( children ) then
-			subprops[resource] = { resource }
+			self.subprops[resource] = { resource }
 		else
-			subprops[resource] = { resource , table.flatten ( table.map ( children, function (i,c) return subproperties(c) end ) ) }
+			self.subprops[resource] = { resource , table.flatten ( table.map ( children, function (i,c) return self:subproperties(c) end ) ) }
 		end
 	end
-	return subprops[resource]
+	return self.subprops[resource]
 end
 
 -- returns sql variable name for a queryterm
-local function variable_name(query,term)
+function RDFLite:variable_name(query,term)
 	-- look up the first occurence of this term in the where clauses, and compute 
 	-- the level and s/p/o position of it
 	local index = table.index ( table.flatten ( query.where_clauses ), term )
@@ -562,7 +616,7 @@ local function variable_name(query,term)
 		-- so we check if we find the term in the keyword clauses, otherwise we throw 
 		-- an error
 		if table.include ( table.keys ( query.keywords ) , term ) then
-			return "t0.s"
+			return "t1.s"
 		else
 			error ( "unbound variable :" .. tostring(term) .. " in select of " .. query:to_sp() )
 		end
@@ -574,13 +628,13 @@ local function variable_name(query,term)
 end
 
 -- wrap resources into ActiveRDF resources, literals into Strings
-local function wrap(query, results)
+function RDFLite:wrap(query, results)
 	return table.map ( results, function ( i, row )
-		return table.map ( row, function ( j, result ) return parse(result) end )
+		return table.map ( row, function ( j, result ) return self:parse(result) end )
 	end)
 end
 
-local function parse(result)
+function RDFLite:parse(result)
 	local capture1 = Literal:match(result)
 	local capture2 = Resource:match(result)
 	
@@ -595,7 +649,7 @@ local function parse(result)
 	end
 end
 
-local function create_indices(params)
+function RDFLite:create_indices(params)
 	local sidx = params['sidx'] or false
 	local pidx = params['pidx'] or false
 	local oidx = params['oidx'] or false
@@ -604,23 +658,22 @@ local function create_indices(params)
 	local poidx = params['poidx'] or true
 	local opidx = params['opidx'] or false
 
-	-- creating lookup indices
-	db:setautocommit(false)
-	if sidx then db:execute('create index if not exists sidx on triple(s)') end
-	if pidx then db:execute('create index if not exists pidx on triple(p)') end
-	if oidx then db:execute('create index if not exists oidx on triple(o)') end
-	if spidx then db:execute('create index if not exists spidx on triple(s,p)') end
-	if soidx then db:execute('create index if not exists soidx on triple(s,o)') end
-	if poidx then db:execute('create index if not exists poidx on triple(p,o)') end
-	if opidx then db:execute('create index if not exists opidx on triple(o,p)') end
-	db:commit()
+	-- creating lookup indices	
+	if sidx then self.db:execute('create index if not exists sidx on triple(s)') end
+	if pidx then self.db:execute('create index if not exists pidx on triple(p)') end
+	if oidx then self.db:execute('create index if not exists oidx on triple(o)') end
+	if spidx then self.db:execute('create index if not exists spidx on triple(s,p)') end
+	if soidx then self.db:execute('create index if not exists soidx on triple(s,o)') end
+	if poidx then self.db:execute('create index if not exists poidx on triple(p,o)') end
+	if opidx then self.db:execute('create index if not exists opidx on triple(o,p)') end
+	self.db:commit()
 end
 
 -- transform triple into internal format <uri> and "literal"
-local function internalise(r)
-	if r['uri'] then
+function RDFLite:internalise(r)
+	if type(r) == 'table' and r['uri'] then
 		return "<"..r.uri..">"
-	elseif r:find('^?') then
+	elseif type(r) == 'string' and r:find('^?') then
 		return nil
 	else
 		return '"'..tostring(r)..'"'
@@ -628,45 +681,10 @@ local function internalise(r)
 end
 
 -- transform resource/literal into ntriples format
-local function serialise(r)
+function RDFLite:serialise(r)
 	if oo.instaceof ( r, RDFS.Resource ) then
 		return "<"..r.uri..">"
 	else
 		return '"'..tostring(r)..'"'
 	end
-end
-
-local Resource = re.compile ( [[ '<' { [^>]* } '>' ]] )
-local Literal = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ]]  )
-local SPOC = {'s','p','o','c'}
-
------------------------------------------------------------------------------
--- Prepares a SQL statement using placeholders.
--- Extracted from http://sputnik.freewisdom.org
------------------------------------------------------------------------------
-local function prepare(statement, ...)
-	local count = select('#', ...)
-
-	if count > 0 then
-		local someBindings = {}
-
-		for index = 1, count do
-			local value = select(index, ...)
-			local type = type(value)
-
-			if type == 'string' then
-				value = '\'' .. value:gsub('\'', '\'\'') .. '\''
-			elseif type == 'nil' then
-				value = 'null'
-			else
-				value = tostring(value)
-			end
-
-			someBindings[index] = value
-		end
-
-		statement = statement:format(unpack(someBindings))
-	end
-
-	return statement
 end

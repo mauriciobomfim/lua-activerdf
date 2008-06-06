@@ -6,6 +6,7 @@ local UUID = require 'uuid'
 local re = require 're'
 local table = table
 local string = string
+local print = print
 
 local nonspace = re.compile("[^ \t\b\r\f\v]")
 local space = re.compile("[ \t\b\r\f\v]")
@@ -33,7 +34,7 @@ function NTriplesParser.parse_node(input)
 	if capture then
 		return RDFS.Resource("http://www.activerdf.org/bnode/"..UUID.new().."/#"..capture)		
 	else
-		capture, capture2 = MatchLiteral:match(input)
+		capture, capture2 = MatchLiteral:match(input)		
 		if capture then
 			value = NTriplesParser.fix_unicode(capture)
 			if capture2 then
@@ -68,16 +69,23 @@ function NTriplesParser.parse(input)
 	
 	for triple in input:gmatch("[^\r\n]+") do	    		
 		nodes = {}		
-      triple = triple:match("%s*(.*)")
-		while triple ~= "" do
+     	triple = triple:match("%s*(.*)")
+		while triple and triple ~= "" do			
 			local _triple = MatchNode:match(triple)
-			triple = triple:match(_triple.."(.*)")
+									
 			table.insert(nodes, _triple)
-			triple = triple:match("%s*(.*)")
+		
 			if table.getn(nodes) == 3 then
 				break
 			end
-      end
+	
+			triple = triple:match( "%s*" .. _triple:gsub("([[%]$()%%.*+?^-])", "%%%1") .. "(.*)" )
+							
+			if triple then
+				triple = triple:match("%s*(.*)")
+			end
+      	end
+      	
 		-- handle bnodes if necessary (bnodes need to have uri generated)
 		capture = MatchBNode:match(nodes[1])
 		if capture then
@@ -88,18 +96,18 @@ function NTriplesParser.parse(input)
 				subject = RDFS.Resource(capture)
 			end
 		end
-
+		
 		capture = MatchResource:match(nodes[2])
-      if capture then
+      	if capture then
 			predicate = RDFS.Resource(capture)
-      end
+      	end
 
 		-- handle bnodes and literals if necessary (literals need unicode fixing)
 		capture = MatchBNode:match(nodes[3])
 		if capture then
 			object = RDFS.Resource("http://www.activerdf.org/bnode/"..uuid.."/#"..capture)
 		else
-			capture, capture2 = MatchLiteral:match(nodes[3])
+			capture, capture2 = MatchLiteral:match(nodes[3])			
 			if capture then
 				value = NTriplesParser.fix_unicode(capture)
             if capture2 then

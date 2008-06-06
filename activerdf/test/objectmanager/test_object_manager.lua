@@ -1,10 +1,13 @@
 require 'activerdf'
 require 'activerdf.test.common'
 
-local oo = require 'loop.simple'
+local oo = activerdf.oo
 local ConnectionPool = activerdf.ConnectionPool
 local RDFS = activerdf.RDFS
+local RDF = activerdf.RDF
 local Namespace = activerdf.Namespace
+
+local TEST_PATH = 'lua/activerdf/test/'
 
 -- TestObjectManager
 function setup()
@@ -30,7 +33,7 @@ end
 
 function test_class_construct_classes()
 	local adapter = get_write_adapter()
-	adapter:load ( "test_person_data.nt" )
+	adapter:load ( TEST_PATH .. "test_person_data.nt" )
 
 	Namespace.register('test', 'http://activerdf.org/test/')
 
@@ -39,14 +42,14 @@ function test_class_construct_classes()
 	-- assert TEST::Person.ancestors.include?(RDFS::Resource) -- to check ancestors on loop
 	assert ( oo.superclass ( activerdf.TEST.Person ) == activerdf.RDFS.Resource )
 	assert ( oo.instanceof ( activerdf.TEST.Person(''), activerdf.TEST.Person ) )
-	assert ( pcall ( activerdf.TEST.Person('').uri ) )
+	assert ( activerdf.TEST.Person('').uri ~= nil )
 
 	assert ( RDFS.Resource('http://www.w3.org/2000/01/rdf-schema#Class') == RDFS.Class )
 	-- assert RDFS::Class.ancestors.include?(RDFS::Resource)
 	assert ( oo.superclass ( RDFS.Class ) == RDFS.Resource )
 	assert ( oo.isclass ( RDFS.Class ) )
 	assert ( oo.instanceof ( RDFS.Class(''), RDFS.Resource ) )
-	assert ( pcall ( RDFS.Class('').uri ) )
+	assert ( RDFS.Class('').uri ~= nil )
 end
 
 function test_custom_code()
@@ -59,7 +62,7 @@ end
 
 function test_class_uri()
 	local adapter = get_write_adapter()
-	adapter:load ( "test_person_data.nt" )
+	adapter:load ( TEST_PATH .. "test_person_data.nt" )
 	Namespace.register('test', 'http://activerdf.org/test/')
 
 	assert ( RDFS.Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type') == RDF.type )
@@ -69,7 +72,8 @@ function test_class_uri()
 end
 
 function test_to_xml()
-	get_adapter():load ( "test_person_data.nt" )
+	get_adapter():load ( TEST_PATH .. "test_person_data.nt" )
+	
 	Namespace.register('test', 'http://activerdf.org/test/')
 
 	local eyal = RDFS.Resource('http://activerdf.org/test/eyal')
@@ -82,8 +86,8 @@ function test_to_xml()
 	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
 	</rdf:Description>
 	</rdf:RDF>]]
-	assert ( string.find ( eyal:to_xml(), snippet ) )
 
+	assert ( string.find ( eyal:to_xml(), snippet ) )
 
 	local url = 'http://gollem.swi.psy.uva.nl/cgi-bin/rdf-parser'
 	--uri = URI.parse(url)
@@ -94,9 +98,9 @@ function test_to_xml()
 end
 
 setup()
---test_class_construct_classes()
---test_class_uri()
+test_class_construct_classes()
+test_class_uri()
 test_custom_code()
 test_resource_creation()
---test_to_xml()
+test_to_xml()
 teardown()

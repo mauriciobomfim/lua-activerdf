@@ -18,3 +18,4 @@ local load_adapter = function(s)
 end
 
 load_adapter('activerdf_sparql')
+load_adapter('activerdf_rdflite')
