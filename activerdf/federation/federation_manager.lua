@@ -29,9 +29,8 @@ end
 -- executes read-only queries
 -- by distributing query over complete read-pool
 -- and aggregating the results
-function FederationManager.query(q, options, block)
-	local options = options or { flatten = true }
-	
+function FederationManager.query(q, options, block)	
+	local options = options or { flatten = true }	
 	-- build Array of results from all sources
 	-- TODO: write test for sebastian's select problem
 	-- (without distinct, should get duplicates, they
@@ -57,8 +56,7 @@ function FederationManager.query(q, options, block)
 			table.foreach(source_results, function(index, clauses)
 				table.insert(results, clauses)
 			end)
-		end)
-				
+		end)					
 		-- filter the empty results
 		results = table.reject(results, function(index, ary) return table.empty(ary) end)
 		
@@ -71,7 +69,7 @@ function FederationManager.query(q, options, block)
 		end		
 		-- flatten results array if only one select clause
 		-- to prevent unnecessarily nested array [[eyal],[renaud],...]
-		if #q.select_clauses == 1 or q._ask then									
+		if #q.select_clauses == 1 or q._ask then
 			results = ObjectManager.flatten(results)			
 		end		
 		-- remove array (return single value or nil) if asked to

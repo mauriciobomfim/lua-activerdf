@@ -8,13 +8,15 @@ local RDFS = activerdf.RDFS
 local adapter
 local yeal
 
+local TEST_PATH = 'lua/activerdf/test/'
+
 -- TestResourceReading
 function setup()
 	ConnectionPool.clear()
 	adapter = get_adapter()
-	adapter:load ( "test_person_data.nt" )
+	adapter:load ( TEST_PATH .. "test_person_data.nt" )
 	Namespace.register('test', 'http://activerdf.org/test/')
-
+	
 	eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
 end
 
@@ -27,7 +29,7 @@ function test_find_all_instances()
 end
 
 function test_class_predicates()
-	assert ( 4 == table.getn( RDFS.Resource.predicates ) )
+	assert ( 4 == table.getn( RDFS.Resource.predicates() ) )
 end
 
 function test_eyal_predicates()
@@ -117,8 +119,8 @@ end
 function test_finders_with_options()
 	ConnectionPool.clear()
 	local adapter = get_adapter
-	local file_one = "small-one.nt"
-	local file_two = "small-two.nt"
+	local file_one = TEST_PATH .. "small-one.nt"
+	local file_two = TEST_PATH .. "small-two.nt"
 	adapter:load ( file_one )
 	adapter:load ( file_two )
 
@@ -144,7 +146,7 @@ end
 
 setup()
 test_class_predicates()
---test_eyal_age()
+test_eyal_age()
 --test_eyal_predicates()
 --test_eyal_type()
 --test_eyal_types()

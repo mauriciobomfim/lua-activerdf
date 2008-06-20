@@ -3,6 +3,10 @@ require 'activerdf.federation.federation_manager'
 local type = type
 local unpack = unpack
 local tostring = tostring
+local tonumber = tonumber
+local pairs = pairs
+
+local print = print
 
 module "activerdf"
 
@@ -55,23 +59,17 @@ function Query:ask()
 end
 
 -- Adds variables to select distinct clause
-function Query:distinct(...)
-	local s = {...}	
-	self._distinct = true
-	if s[1] then		
-		return self:select(unpack(s))
-	else
-		return self._distinct
-	end
+function Query:distinct(...)	
+	self._distinct = true	
+	return self:select(...)		
 end
 
 Query.select_distinct = Query.distinct
 
 -- Adds variables to count clause
-function Query:count(...)
-	local s = {...}
+function Query:count(...)	
 	self._count = true
-	return self:select(unpack(s))
+	return self:select(...)
 end
 
 -- Adds sort predicates
@@ -119,7 +117,7 @@ function Query:filter_operator(variable, operator, operand)
 		error("variable must be a string")
 	end
 
-	return self:filter "?"..variable.." "..operator.." "..operand
+	return self:filter ("?"..variable.." "..operator.." "..operand)
 end
 
 -- filter variable on specified language tag, e.g. lang(:o, 'en')
@@ -159,7 +157,7 @@ end
 -- an RDFS.Resource. Keyword queries are specified with the special 'keyword'
 -- symbol: Query.new.select('?s').where('?s', 'keyword', 'eyal')
 function Query:where(s,p,o,c)		
-	if p == 'keyword' then
+	if p == '?keyword' then
 		-- treat keywords in where-clauses specially
 		self:keyword_where(s,o)
 	else
@@ -175,7 +173,7 @@ function Query:where(s,p,o,c)
 		end
 		if not ( oo.instanceof(s, RDFS.Resource) or oo.subclassof(s, RDFS.Resource) or (type(s) == 'string') ) then			
 			error ("cannot add a where clause with p "..tostring(p)..": p must be a resource or a variable")
-		end
+		end		
 		table.insert(self.where_clauses, table.map({s,p,o,c}, function(index, arg) return self:parametrise(arg) end))
 	end
 	return self
@@ -211,18 +209,15 @@ function Query:execute(options, block)
 	
 	if type(block) == 'function' then		
 		for index, result in pairs(FederationManager.query(self, options)) do
-			return block(result)
+			return block(unpack(result))
 		end
-		-- return table.foreach(FederationManager.query(self), function(index, clauses)
-		-- return block(unpack(clauses))
-		-- end)
-	else
+	else		
 		return FederationManager.query(self, options)
 	end
 end
 
 -- Returns query string depending on adapter (e.g. SPARQL, N3QL, etc.)
-function Query:__tostring()
+function Query:__tsostring()
 	if not ConnectionPool.read_adapters()[1] then		
 		return self:inspect()
 	else				
@@ -246,8 +241,10 @@ function Query:parametrise(s)
 		return s
 	elseif s == nil then
 		return nil
+	elseif type(s) == 'number' then
+		return Literal.to_ntriple(s)
 	else
-	return '"'..tostring(s)..'"'
+		return '"'..tostring(s)..'"'
 	end
 end
 

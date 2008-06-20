@@ -67,7 +67,7 @@ function Query2SPARQL.where_clauses(query)
 		end
 	end)
 	
-	return table.concat(where_clauses, '. ').." ."
+	return table.concat(where_clauses, ' . ').." ."
 	
 end
 
@@ -75,9 +75,10 @@ function Query2SPARQL.construct_clause(term)
 	if type(term) == "string" and term:find("^?") then		
 		return tostring(term)
 	elseif oo.instanceof(term, RDFS.Resource) then
-			return term:to_ntriple()
-	else
-		--return Literal.to_ntriple(term)
+		return term:to_ntriple()
+	elseif type(term) == "number" then
+		return Literal.to_ntriple(term)
+	else		
 		return tostring(term)
 	end
 end

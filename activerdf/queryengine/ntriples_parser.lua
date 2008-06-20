@@ -70,15 +70,16 @@ function NTriplesParser.parse(input)
 	for triple in input:gmatch("[^\r\n]+") do	    		
 		nodes = {}		
      	triple = triple:match("%s*(.*)")
-		while triple and triple ~= "" do			
+		while triple and triple ~= "" do
+			
 			local _triple = MatchNode:match(triple)
-									
+			
 			table.insert(nodes, _triple)
 		
 			if table.getn(nodes) == 3 then
 				break
 			end
-	
+			
 			triple = triple:match( "%s*" .. _triple:gsub("([[%]$()%%.*+?^-])", "%%%1") .. "(.*)" )
 							
 			if triple then

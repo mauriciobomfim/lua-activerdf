@@ -20,6 +20,8 @@ local type = type
 local unpack = unpack
 local error = error
 local tonumber = tonumber
+local math = math
+local next = next
 local print = print
 
 --require 'federation/connection_pool'
@@ -43,6 +45,10 @@ local Resource = re.compile ( [[ '<' { [^>]* } '>' ]] )
 local Literal = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ]]  )
 local SPOC = {'s','p','o','c'}
 
+
+local spoc_index = function(index)
+	return tonumber ( ( string.gsub( math.fmod ( index , 4 ), '^0', '1' ) ) )
+end
 -----------------------------------------------------------------------------
 -- Prepares a SQL statement using placeholders.
 -- Extracted from http://sputnik.freewisdom.org
@@ -278,8 +284,8 @@ function RDFLite:load(location)
  else]]--
 	local file, err = io.open (location , 'r')	
 	if file then
-		local data = file:read('*a')
-		file:close()
+		local data = file:read('*a')		
+		file:close()		
 		return self:add_ntriples(data, context)
 	else
 		error(err)
@@ -301,15 +307,14 @@ function RDFLite:add_ntriples(ntriples, context)
 		subject, predicate, object = unpack(table.map({s,p,o}, function(i,r) return self:internalise(r) end))
 		
 		-- insert triple into database
-		insert = prepare('insert into triple values (%s,%s,%s,%s);', subject, predicate, object, context)
-		
+		insert = prepare('insert into triple values (%s,%s,%s,%s);', subject, predicate, object, context)		
 		self.db:execute(insert)		
 		-- if keyword-search available, insert the object into keyword search
 		-- @ferret << {:subject => subject, :object => object} if keyword_search?
 	end)
 
 	self.db:commit()
-	
+
 	return self.db
 end
 
@@ -317,27 +322,27 @@ end
 function RDFLite:query(query)
 	-- construct query clauses
 	local sql, conditions = self:translate(query)
-		
+
 	-- executing query, passing all where-clause values as parameters (so that 
 	-- sqlite will encode quotes correctly)
 		
 	local row = {}
 	local results = {}	
-		
+
 	local cur, err = self.db:execute(prepare(sql, unpack(conditions)))	
 	
 	if cur then
 		while cur:fetch(row) do
-			table.insert(results, row)			
+			table.insert(results, table.dup(row))			
 		end
 	else
 		error(err)
 	end
-	
+
 	-- if ASK query, we check whether we received a positive result count
-	if query:ask() then
+	if query._ask then
 		return {{tonumber(results[1][1]) > 0}}
-	elseif query:count() then
+	elseif query._count then		
 		return {{tonumber(results[1][1])}}
 	else
 		-- otherwise we convert results to ActiveRDF nodes and return them
@@ -348,33 +353,33 @@ end
 -- translates ActiveRDF query into internal sqlite query string
 function RDFLite:translate(query)
 	local where, conditions = self:construct_where(query)
-	return self:construct_select(query) .. self:construct_join(query) .. where .. self:construct_sort(query) .. self:construct_limit(query), conditions 
+	local sql = self:construct_select(query) .. self:construct_join(query) .. where .. self:construct_sort(query) .. self:construct_limit(query) 
+	return sql, conditions 
 end
 
 -- private
 -- construct select clause
 function RDFLite:construct_select(query)
 	-- ASK queries counts the results, and return true if results > 0
-	if query:ask() then
+	if query._ask then
 		return "select count(*)"
 	end
-
+	
 	-- add select terms for each selectclause in the query
 	-- the term names depend on the join conditions, e.g. t1.s or t2.p
-	local select = table.map ( query.select_clauses, function (i,term)
+	local select = table.map ( query.select_clauses, function (i,term)		
 		return self:variable_name(query, term)
 	end)
 
 	-- add possible distinct and count functions to select clause
-	local select_clause = ''
-	if query:distinct() then
+	local select_clause = ''	
+	if query._distinct then
 		select_clause = select_clause .. 'distinct '
 	end
 	select_clause = select_clause .. table.concat(select, ', ')
-	if query:count() then
+	if query._count then
 		select_clause = "count("..select_clause..")"
 	end
-
 	return "select " .. select_clause
 end
 
@@ -432,11 +437,12 @@ function RDFLite:construct_join(query)
 	end)
 
 	local aliases = {}
-
-	table.foreach(where_clauses, function ( index, term )
-		-- if the term has been joined with his buddy already, we can skip it
-		if not table.include ( considering, term) then
-			next ( where_clauses, index )
+	local index, term = next(where_clauses)
+	while(term) do				
+		-- if the term has been joined with his buddy already, we can skip it		
+		if not table.include ( considering, term ) then
+			index, term = next ( where_clauses, index )
+			break
 		end
 
 		-- we find all (other) occurrences of this term
@@ -444,14 +450,16 @@ function RDFLite:construct_join(query)
 
 		-- if the term doesnt have a join-buddy, we can skip it
 		if table.getn( indices ) == 1 then
-			next ( where_clauses, index )
+			index, term = next ( where_clauses, index )
+			break
 		end
 		
 		-- construct t1,t2,... as aliases for term
 		-- and construct join condition, e.g. t1.s
-		local termalias = "t"..( index / 4 )
-		local termjoin = termalias.."."..SPOC[ math.fmod ( index, 4 ) ]
-
+		
+		local termalias = "t"..( math.floor ( index / 4 ) ) + 1				
+		local termjoin = termalias.."."..SPOC[ spoc_index(index)  ]
+		
 		local join 
 		if join_stmt:find( termalias ) then
 			join = ""
@@ -459,16 +467,18 @@ function RDFLite:construct_join(query)
 			join = "triple as "..termalias
 		end
 
-		table.foreach(indices, function(ind, i)
+		local ind, i = next ( indices )
+		while( i ) do			
 			-- skip the current term itself
 			if i == index then
-				next (indices, ind)
+				ind, i  = next (indices, ind)
+				break
 			end
 			
 			-- construct t1,t2, etc. as aliases for buddy,
 			-- and construct join condition, e.g. t1.s = t2.p
-			local buddyalias = "t"..( i / 4 )
-			local buddyjoin = buddyalias.."."..SPOC[ math.fmod ( i, 4 ) ]
+			local buddyalias = "t"..( math.floor ( i / 4 ) ) + 1						
+			local buddyjoin = buddyalias.."."..SPOC[ spoc_index(index) ]
 
 			-- TODO: fix reuse of same table names as aliases, e.g.
 			-- "from triple as t2 join triple as t3 on ... join t2 on ..."
@@ -477,17 +487,19 @@ function RDFLite:construct_join(query)
 			-- "from triple as t2 join triple as t3 on ... join triple as t2 ..."
 			-- is ambiguous
 			if join_stmt:find ( buddyalias ) then
-				join = join .. "and "..termjoin.." = "..buddyjoin
+				join = join .. " and "..termjoin.." = "..buddyjoin
 			else
 				join = join .. " join triple as "..buddyalias.." on "..termjoin.." = "..buddyjoin
 			end
-		end)
+			ind, i = next( indices, ind )
+		end
 		
 		join_stmt = join_stmt .. join
 		
-		-- remove term from 'todo' list of still-considered terms
-		table.remove ( considering, term )
-	end)
+		-- remove term from 'todo' list of still-considered terms		
+		considering[term] = nil
+		index, term = next ( where_clauses, index )
+	end
 
 	if join_stmt == '' then
 		return " from triple as t1 "
@@ -543,9 +555,13 @@ function RDFLite:construct_where(query)
 		--@ferret.search_each("object:#{keywords}") do |idx,score|
 		--	subjects << @ferret[idx][:subject]
 		--end
-		--subjects.uniq! if query.distinct?
+		
+		if query._distinct then
+			table.uniq(subjects)
+		end
 		--where << "#{variable_name(query,select_subject.first)} in (#{subjects.collect {'?'}.join(',')})"
-		--right_hand_sides += subjects
+		where = where .. self:variable_name(query,select_subject[1]).." in ("..table.concat(table.map(subjects, function(i) return '?' end), ',')..")"
+		right_hand_sides = table.add(right_hand_sides, subjects)
 	end
 
 	if table.empty ( where ) then
@@ -601,7 +617,7 @@ function RDFLite:variable_name(query,term)
 	-- look up the first occurence of this term in the where clauses, and compute 
 	-- the level and s/p/o position of it
 	local index = table.index ( table.flatten ( query.where_clauses ), term )
-
+	
 	if index == nil then
 		-- term does not appear in where clause
 		-- but maybe it appears in a keyword clause
@@ -614,16 +630,17 @@ function RDFLite:variable_name(query,term)
 		-- or if we use a select clause that does not appear in any where clause
 
 		-- so we check if we find the term in the keyword clauses, otherwise we throw 
-		-- an error
+		-- an error		
 		if table.include ( table.keys ( query.keywords ) , term ) then
 			return "t1.s"
 		else
 			error ( "unbound variable :" .. tostring(term) .. " in select of " .. query:to_sp() )
 		end
 	end
-
-	local termtable = "t"..(index / 4)
-	local termspo = SPOC[ math.fmod ( index , 4 ) ]
+	
+	local termtable = "t"..( math.floor(index / 4) ) + 1	
+	local termspo = SPOC[ spoc_index(index) ]	
+	
 	return termtable.."."..termspo
 end
 
@@ -682,7 +699,7 @@ end
 
 -- transform resource/literal into ntriples format
 function RDFLite:serialise(r)
-	if oo.instaceof ( r, RDFS.Resource ) then
+	if oo.instanceof ( r, RDFS.Resource ) then
 		return "<"..r.uri..">"
 	else
 		return '"'..tostring(r)..'"'

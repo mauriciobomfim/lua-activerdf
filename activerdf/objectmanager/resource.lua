@@ -50,7 +50,7 @@ function Resource:__init(uri)
    end
   return oo.rawnew(self, {
 		uri = _uri,
-		predicates = {}    
+		predicates = {}
   })
 end
 	
@@ -128,7 +128,7 @@ function Resource:to_xml()
 														end)	
 	xml = xml .. '  xml:base="'..base..'">\n'
 	xml = xml .. '<rdf:Description rdf:about="#'..self:localname()..'">\n'	
-	table.foreach(self:direct_predicates(), function(i, p)
+	table.foreach(self:direct_predicates(), function(i, p)		
 		objects = Query():distinct('?o'):where(self, p, '?o'):execute()		
 		table.foreach(objects, function(i, obj)			
 			prefix, localname = Namespace.prefix(p), Namespace.localname(p)			
@@ -165,9 +165,9 @@ end
 
 -- returns the predicates that have this resource as their domain (applicable
 -- predicates for this resource)
-function Resource._predicates()
-	local domain = Namespace.lookup('rdfs', 'domain')
-	return Query():distinct('?p'):where('?p', domain, class_uri):execute() or {}
+function Resource.predicates()
+	local domain = Namespace.lookup('rdfs', 'domain')	
+	return Query():distinct('?p'):where('?p', domain, Resource.class_uri):execute() or {}
 end
 
 -- returns array of all instances of this class (e.g. Person.find_all)
@@ -216,7 +216,7 @@ function Resource:find(...)
  	local args = {...}	
 	local options = (type(args[#args]) == 'table') and table.remove(args,#args) or {}
  
-	local query = Query():distinct('?s')
+	local query = Query():distinct('?s')	
 	query:where('?s', Namespace.lookup('rdf','type'), self)
 
 	if options['order'] then
@@ -265,8 +265,8 @@ function Resource:localname()
 end
 
 -- manages invocations such as eyal.age
-function Resource:__index(method, ...)				
-	if type(method) == 'string' then				
+function Resource:__index(method, ...)					
+	if type(method) == 'string' then		
 		if Resource[method] then						
 			return Resource[method]
 		end		
@@ -324,17 +324,16 @@ function Resource:__index(method, ...)
 				methodname = string.sub(methodname, 5,-1)
 			end
 			
-			-- check possibility (5)
-			
+			-- check possibility (5)			 
 			if self.predicates[methodname] then
 				if update then
 					return self:set_predicate(self.predicates[methodname], args)
-				else
+				else					
 					return self:get_predicate(self.predicates[methodname])
 				end
 			end
 			
-			-- check possibility (6)		
+			-- check possibility (6)
 			if table.include(Namespace.abbreviations(), methodname) then
 				local namespace = {}
 				Resource.uri = methodname
@@ -366,7 +365,7 @@ function Resource:__index(method, ...)
 			if update then
 				candidates = table.uniq(table.insert(self:class_level_predicates(), self:direct_predicates()))
 			else
-				candidates = self:direct_predicates()
+				candidates = self:direct_predicates()			
 			end
 			
 			-- checking possibility (1) and (3)
@@ -374,12 +373,12 @@ function Resource:__index(method, ...)
 				if Namespace.localname(pred) == methodname then										
 					if update then
 						return self:set_predicate(pred, args)
-					else
+					else				
 						return self:get_predicate(pred, flatten)
 					end
 				end
 			end)
-			
+				
 			if result then return result end
 			
 			if update then
@@ -393,9 +392,9 @@ function Resource:__index(method, ...)
 			-- direct_predicates instead of class_level_predicates. If we didn't find
 			-- anything with direct_predicates, we need to try the
 			-- class_level_predicates. Only if we don't find either, we
-			-- throw "method_missing"
+			-- throw "method_missing"			
 			candidates = self:class_level_predicates()
-
+						
 			-- if any of the class_level candidates fits the sought method, then we
 			-- found situation (2), so we return nil or [] depending on the {:array =>
 			-- true} value			
@@ -418,7 +417,7 @@ function Resource:__index(method, ...)
 					local _dup = klass(uri)
 					return _dup[method](self, unpack(args))
 				end				
-			end)		
+			end)				
 			return result						
 		end	
 		-- if none of the three possibilities work out, we don't know this method
@@ -438,7 +437,7 @@ function Resource:save()
 	table.foreach(self:types(), function(i,t)
 		db.add(self, rdftype, t)
 	end)
-
+	
 	Query():distinct('?p','?o'):where(self, '?p', '?o'):execute(function(p, o)
 		db:add(self, p, o)
 	end)
@@ -479,19 +478,17 @@ end
 
 -- returns all predicates that fall into the domain of the rdf:type of this
 -- resource
-function Resource:class_level_predicates()
+function Resource:class_level_predicates()	
 	local type = Namespace.lookup('rdf', 'type')
-	local domain = Namespace.lookup('rdfs', 'domain')
+	local domain = Namespace.lookup('rdfs', 'domain')	
 	return Query():distinct('?p'):where(self,type,'?t'):where('?p', domain, '?t'):execute() or {}
 end
 
 -- returns all predicates that are directly defined for this resource
 function Resource:direct_predicates(distinct)	
-	local distinct = distinct == nil and true or distinct
-	local q
-	if distinct then		
-		q = Query():distinct('?p'):where(self, '?p', '?o'):execute()		
-		return q
+	local distinct = distinct == nil and true or distinct	
+	if distinct then
+		return Query():distinct('?p'):where(self, '?p', '?o'):execute()
 	else		
 		return Query():select('?p'):where(self, '?p', '?o'):execute()
 	end
@@ -670,9 +667,9 @@ function DynamicFinderProxy:query(...)
     
 	-- use sort order if given
     if options['order'] then
-      sort_predicate = options['order']
-      query:sort('?sort_value')
-      -- add sort predicate where clause unless we have it already
+		sort_predicate = options['order']
+      	query:sort('?sort_value')
+      	-- add sort predicate where clause unless we have it already      	
 		if not table.include(self.where, sort_predicate) then
 			query:where('?s', sort_predicate, '?sort_value')
 		end

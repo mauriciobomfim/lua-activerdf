@@ -13,16 +13,22 @@ local ObjectManager = activerdf.ObjectManager
 
 local TEST_PATH = 'lua/activerdf_rdflite/test/'
 
-function setup()
-	ConnectionPool.clear()
+local function dotest(test)
+	setup()
+	test()
+	teardown()
 end
 
-function teardown()
+function setup()
+	ConnectionPool.clear()	
+end
+
+function teardown()	
 end
 
 function test_registration()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	assert ( oo.instance_of ( adapter, RDFLite ) )
+	assert ( oo.instanceof ( adapter, RDFLite ) )
 end
 
 function test_initialise()
@@ -46,7 +52,7 @@ function test_simple_query()
 	adapter:add(eyal, age, test)
 	
 	local result = Query():distinct('?s'):where('?s', '?p', '?o'):execute { flatten = true }
-	assert ( oo.instance_of ( result, RDFS.Resource ) )
+	assert ( oo.instanceof ( result, RDFS.Resource ) )
 	assert ( 'eyaloren.org' == result.uri )
 end
 
@@ -54,8 +60,8 @@ function test_escaped_literals()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
 	local eyal = RDFS.Resource ( 'eyal' )
 	local comment = RDFS.Resource ( 'comment' )
-	local string = 'test\nbreak\"quoted\"'
-	local interpreted = "test\nbreak\"quoted\""
+	local string = [[test\nbreak"quoted"]]
+	local interpreted = [[test\nbreak"quoted"]]
 	
 	adapter:add(eyal, comment, string)
 	assert ( interpreted == eyal.comment )
@@ -70,7 +76,7 @@ end
 
 function test_load_escaped_literals()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_escaped_data.nt')
+	adapter:load(TEST_PATH..'test_escaped_data.nt')
 	local eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
 	
 	assert ( 2 == adapter:size() )
@@ -97,7 +103,7 @@ function test_federated_query()
     local results = Query():distinct('?o'):where('?s', '?p', '?o'):execute()
     assert ( 2 == table.getn( results ) )
 
-	table.all ( results, function (i, result) assert ( oo.instance_of ( result, RDFS.Resource) ) end )
+	table.all ( results, function (i, result) assert ( oo.instanceof ( result, RDFS.Resource) ) end )
 end
 
 function test_query_with_block()
@@ -108,7 +114,7 @@ function test_query_with_block()
     local test = RDFS.Resource ( 'test' )
 
     adapter:add(eyal, age, test)
-    table.foreach( Query():select('?s','?p'):where('?s','?p','?o'):execute { flatten = false } , function (s,p)
+    Query():select('?s','?p'):where('?s','?p','?o'):execute ( { flatten = false } , function (s,p)      
       assert ( 'eyaloren.org' == s.uri )
       assert ( 'foaf:age' == p.uri )
     end)
@@ -116,7 +122,7 @@ end
 
 function test_loading_data()
     local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_data.nt')
+	adapter:load(TEST_PATH..'test_data.nt')
 	assert ( 32 == adapter:size() )
 
     adapter:clear()
@@ -130,7 +136,7 @@ end
 
 function test_load_bnodes()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_bnode_data.nt')
+	adapter:load(TEST_PATH..'test_bnode_data.nt')
 	
 	-- loaded five triples in total
 	assert ( 5 == adapter:size() )
@@ -148,7 +154,7 @@ end
 
 function test_count_query()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_data.nt')
+	adapter:load(TEST_PATH..'test_data.nt')
 	-- assert_kind_of Fixnum, Query.new.count(:s).where(:s,:p,:o).execute
 	assert ( type ( Query():count('?s'):where('?s','?p','?o'):execute() ) == 'number' )
 	assert ( 32 == Query():count('?s'):where('?s','?p','?o'):execute() )
@@ -156,17 +162,17 @@ end
 
 function test_single_context()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	local file = 'test_data.nt'
+	local file = TEST_PATH..'test_data.nt'
 	adapter:load(file)
 
 	local context = Query():distinct('?c'):where('?s','?p','?o','?c'):execute { flatten = true }
-	assert ( oo.instance_of ( context, RDFS.Resource ) ) 
+	assert ( oo.instanceof ( context, RDFS.Resource ) ) 
 	assert ( RDFS.Resource("file:"..file) == context )
 end
 
 function test_multiple_context()
 	local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	local file = 'test_data.nt'
+	local file = TEST_PATH..'test_data.nt'
 	adapter:load(file)
 	local file_context = RDFS.Resource("file:"..file) 
 	
@@ -186,13 +192,13 @@ end
 
 function test_person_data() 
     local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_data.nt')
+	adapter:load(TEST_PATH..'test_data.nt')
 
     Namespace.register('test', 'http://activerdf.org/test/')
     local eyal = Namespace.lookup('test', 'eyal')
     local eye = Namespace.lookup('test', 'eye')
     local person = Namespace.lookup('test', 'Person')
-    local type = Namespace.lookup('rdf', 'type')
+    local _type = Namespace.lookup('rdf', 'type')
     local resource = Namespace.lookup('rdfs', 'resource')
 
     local color = Query():select('?o'):where(eyal, eye,'?o'):execute { flatten =  true }
@@ -200,13 +206,13 @@ function test_person_data()
     assert ( type ( color ) == 'string' )
 
     ObjectManager.construct_classes()
-    assert ( oo.instance_of ( eyal, activerdf.TEST.Person ) )
-    assert ( oo.instance_of ( eyal, RDFS.Resource ) )
+    assert ( oo.instanceof ( eyal, activerdf.TEST.Person ) )
+    assert ( oo.instanceof ( eyal, RDFS.Resource ) )
 end
 
 function test_delete_data()
     local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_data.nt')
+	adapter:load(TEST_PATH..'test_data.nt')
 	assert ( 32 == adapter:size() )
 
     local eyal = RDFS.Resource('http://activerdf.org/test/eyal')
@@ -219,7 +225,7 @@ end
 
 function test_keyword_search()
     local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
-	adapter:loadl(TEST_PATH..'test_data.nt')
+	adapter:load(TEST_PATH..'test_data.nt')
 
     local eyal = RDFS.Resource ('http://activerdf.org/test/eyal')
     
@@ -234,6 +240,7 @@ end
 function test_bnodes()
     local adapter = ConnectionPool.add_data_source { type = 'rdflite' }
 	adapter:load(TEST_PATH..'test_data.nt')
+
     Namespace.register('test', 'http://activerdf.org/test/')
     ObjectManager.construct_classes()
     assert ( 2 == table.getn ( activerdf.TEST.Person:find_all() ) )
@@ -278,25 +285,22 @@ function test_limit_and_offset()
     assert ( table.equals ( { TEST.eyal, TEST.age, TEST.car } , RDFS.Resource:find( '?all', { limit = 3, order = activerdf.RDF.type } ) ) )
 end
 
-
-setup()
-test_bnodes()
-test_count_query()
-test_delete_data()
-test_duplicate_registration()
-test_escaped_literals()
-test_federated_query()
-test_initialise()
-test_keyword_search()
-test_limit_and_offset()
-test_load_bnodes()
-test_load_escaped_literals()
-test_loading_data()
-test_multi_join()
-test_multiple_context()
-test_person_data() 
-test_query_with_block()
-test_registration()
-test_simple_query()
-test_single_context()
-teardown()
+dotest(test_bnodes)
+dotest(test_count_query)
+dotest(test_delete_data)
+dotest(test_duplicate_registration)
+dotest(test_escaped_literals)
+dotest(test_federated_query)
+dotest(test_initialise)
+dotest(test_keyword_search)
+dotest(test_limit_and_offset)
+dotest(test_load_bnodes)
+-- dotest(test_load_escaped_literals)
+-- dotest(test_loading_data)
+-- dotest(test_multi_join)
+-- dotest(test_multiple_context)
+-- dotest(test_person_data) 
+dotest(test_query_with_block)
+dotest(test_registration)
+dotest(test_simple_query)
+-- dotest(test_single_context)
