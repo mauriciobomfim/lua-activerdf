@@ -5,7 +5,6 @@ local unpack = unpack
 local tostring = tostring
 local tonumber = tonumber
 local pairs = pairs
-
 local print = print
 
 module "activerdf"
@@ -232,8 +231,8 @@ function Query:to_sp()
 end
 
 --  private
-function Query:parametrise(s)
-	if (type(s) == 'string' and (s:sub(1,1) == '?' and s:len() == 2 or s:find('<(.*)>')) )
+function Query:parametrise(s)		
+	if ( type(s) == 'string' and (string.sub(s,1,1) == '?' or string.find(s, '<(.*)>') ) )
 		or oo.instanceof(s, RDFS.Resource)
 		or oo.instanceof(s, Literal)
 		or oo.isclass(s)

@@ -13,7 +13,7 @@ module "activerdf.table"
 index = function(tbl, value)
 	local t = {}
 	table.foreach(tbl, function (i,v) 
-					t[v] = i
+					t[v] = t[v] or i
 				 end)
 	if type(value) == 'table' then
 		table.foreach(t, function(i,v)
@@ -118,7 +118,7 @@ uniq = function(tbl)
 	local t = {}
 	local set = {}
 	table.foreach(tbl, function(i,v) t[v] = v end)
-	table.foreach(t, function(i,v) table.insert(set, v) end)			
+	table.foreach(tbl, function(i,v) table.insert(set, t[v]) end)			
 	return set
 end
 

@@ -1,5 +1,6 @@
 local type = type
 local error = error
+local print = print
 
 module "activerdf"
 
@@ -52,10 +53,10 @@ function FederationManager.query(q, options, block)
 		end)
 	else
 		table.foreach(ConnectionPool.read_adapters(), function(index, source)
-			local source_results = source:query(q)
+			local source_results = source:query(q)			
 			table.foreach(source_results, function(index, clauses)
 				table.insert(results, clauses)
-			end)
+			end)			
 		end)					
 		-- filter the empty results
 		results = table.reject(results, function(index, ary) return table.empty(ary) end)
@@ -67,6 +68,7 @@ function FederationManager.query(q, options, block)
 		if q._distinct then 
 			results = table.uniq(results)
 		end		
+		
 		-- flatten results array if only one select clause
 		-- to prevent unnecessarily nested array [[eyal],[renaud],...]
 		if #q.select_clauses == 1 or q._ask then

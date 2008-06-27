@@ -6,7 +6,6 @@ local UUID = require 'uuid'
 local re = require 're'
 local table = table
 local string = string
-local print = print
 
 local nonspace = re.compile("[^ \t\b\r\f\v]")
 local space = re.compile("[ \t\b\r\f\v]")

@@ -72,7 +72,7 @@ function Query2SPARQL.where_clauses(query)
 end
 
 function Query2SPARQL.construct_clause(term)	
-	if type(term) == "string" and term:find("^?") then		
+	if type(term) == "string" and string.find(term, "^?") then		
 		return tostring(term)
 	elseif oo.instanceof(term, RDFS.Resource) then
 		return term:to_ntriple()
