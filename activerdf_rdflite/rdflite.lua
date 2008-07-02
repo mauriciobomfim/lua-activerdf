@@ -47,15 +47,11 @@ local SPOC = {'s','p','o','c'}
 
 
 local spoc_index = function(index)	
-	if index < 4 then 
-		return math.fmod ( index, 4 )
-	end
-	return math.fmod ( index, 4 ) + 1
+	return math.fmod ( index - 1, 4 ) + 1
 end
 
 local alias_number = function(index)
-	print(index, math.floor ( index / 4 ) + 1)
-	return math.floor ( index / 4 ) + 1		
+	return math.floor ( ( index - 1 )/ 4 )
 end
 -----------------------------------------------------------------------------
 -- Prepares a SQL statement using placeholders.
@@ -331,13 +327,12 @@ function RDFLite:query(query)
 	
 	-- construct query clauses
 	local sql, conditions = self:translate(query)
-
+	
 	-- executing query, passing all where-clause values as parameters (so that 
 	-- sqlite will encode quotes correctly)
 		
 	local row = {}
 	local results = {}	
-	
 	local cur, err = self.db:execute(prepare(sql, unpack(conditions)))	
 	
 	if cur then
@@ -375,7 +370,7 @@ function RDFLite:construct_select(query)
 	end
 	
 	-- add select terms for each selectclause in the query
-	-- the term names depend on the join conditions, e.g. t1.s or t2.p
+	-- the term names depend on the join conditions, e.g. t0.s or t1.p
 	local select = table.map ( query.select_clauses, function (i,term)				
 		return self:variable_name(query, term)
 	end)	
@@ -431,7 +426,7 @@ function RDFLite:construct_join(query)
 
 	-- no join necessary if only one where clause given
 	if table.getn(query.where_clauses) == 1 then
-		return ' from triple as t1 '
+		return ' from triple as t0 '
 	end
 
 	local where_clauses = table.flatten(query.where_clauses)
@@ -465,10 +460,9 @@ function RDFLite:construct_join(query)
 			break
 		end
 		
-		-- construct t1,t2,... as aliases for term
-		-- and construct join condition, e.g. t1.s
-		
-		local termalias = "t"..alias_number(index)				
+		-- construct t0,t1,... as aliases for term
+		-- and construct join condition, e.g. t0.s		
+		local termalias = "t"..alias_number(index + 1)
 		local termjoin = termalias.."."..SPOC[ spoc_index(index)  ]
 	
 		local join 
@@ -488,15 +482,15 @@ function RDFLite:construct_join(query)
 				break
 			end
 			
-			-- construct t1,t2, etc. as aliases for buddy,
-			-- and construct join condition, e.g. t1.s = t2.p
-			local buddyalias = "t"..alias_number( i )						
+			-- construct t0,t1, etc. as aliases for buddy,
+			-- and construct join condition, e.g. t0.s = t1.p			
+			local buddyalias = "t" .. alias_number( i + 1 )						
 			local buddyjoin = buddyalias.."."..SPOC[ spoc_index(index) ]			
 			-- TODO: fix reuse of same table names as aliases, e.g.
-			-- "from triple as t2 join triple as t3 on ... join t2 on ..."
+			-- "from triple as t1 join triple as t2 on ... join t1 on ..."
 			-- is not allowed as such by sqlite
 			-- but on the other hand, restating the aliases gives ambiguity:
-			-- "from triple as t2 join triple as t3 on ... join triple as t2 ..."
+			-- "from triple as t1 join triple as t2 on ... join triple as t1 ..."
 			-- is ambiguous
 			
 			if string.find ( join_stmt, buddyalias ) then
@@ -519,7 +513,7 @@ function RDFLite:construct_join(query)
 	end
 	
 	if join_stmt == '' then
-		return " from triple as t1 "
+		return " from triple as t0 "
 	else
 		return " from "..join_stmt.." "
 	end
@@ -548,11 +542,11 @@ function RDFLite:construct_where(query)
 			if not ( string.find( tostring(subclause), '^?') or subclause == nil ) then				
 				conditions = self:compute_where_condition( i, subclause, query.reasoning and self.reasoning )
 				if table.getn(conditions) == 1 then
-					table.insert ( where , "t"..level.."."..SPOC[i].." = %s" )
+					table.insert ( where , "t"..( level - 1 ).."."..SPOC[i].." = %s" )
 					table.insert ( right_hand_sides , conditions[1] )
 				else
 					conditions = table.map ( conditions, function (i,c) return "'"..c.."'" end )
-					table.insert ( where , "t"..level.."."..SPOC[i].." in ("..table.concat( conditions, ',')..")" )
+					table.insert ( where , "t"..( level - 1 ).."."..SPOC[i].." in ("..table.concat( conditions, ',')..")" )
 				end
 			end
 		end)
@@ -649,12 +643,11 @@ function RDFLite:variable_name(query,term)
 		-- so we check if we find the term in the keyword clauses, otherwise we throw 
 		-- an error		
 		if table.include ( table.keys ( query.keywords ) , term ) then			
-			return "t1.s"
+			return "t0.s"
 		else
 			error ( "unbound variable :" .. tostring(term) .. " in select of " .. query:to_sp() )
 		end
-	end
-	
+	end	
 	local termtable = "t"..alias_number(index)	
 	local termspo = SPOC[ spoc_index(index) ]	
 	return termtable.."."..termspo
