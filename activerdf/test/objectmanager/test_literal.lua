@@ -6,6 +6,12 @@ local XSD = activerdf.XSD
 local LocalizedString = activerdf.LocalizedString
 local Literal = activerdf.Literal
 
+local function dotest(test)
+	setup()
+	test()
+	teardown()
+end
+
 -- TestLiteral
 local adapter
 
@@ -51,9 +57,7 @@ function test_language_tag()
 	assert ( '"dog"@en@test' == LocalizedString('dog', '@en@test'):to_ntriple() )
 end
 
-setup()
-test_automatic_conversion()
-test_equality()
-test_language_tag()
-test_xsd_string()
-teardown()
+dotest(test_automatic_conversion)
+dotest(test_equality)
+dotest(test_language_tag)
+dotest(test_xsd_string)

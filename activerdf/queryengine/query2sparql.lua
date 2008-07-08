@@ -15,7 +15,7 @@ function Query2SPARQL.translate(query)
 		local distinct = query._distinct and "DISTINCT " or ""
 		
 		local select_clauses = table.map(query.select_clauses, function(i,s) return Query2SPARQL.construct_clause(s) end)
-
+ 
 		str = str .. "SELECT "..distinct..table.concat(select_clauses, ' ').." "
 		str = str .. "WHERE { "..Query2SPARQL.where_clauses(query).." "..Query2SPARQL.filter_clauses(query).."} "
 		

@@ -1,5 +1,5 @@
 require 'activerdf'
-local oo = require 'loop.simple'
+local oo = activerdf.oo
 local ConnectionPool = activerdf.ConnectionPool
 local table = activerdf.table
 

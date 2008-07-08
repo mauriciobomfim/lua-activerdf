@@ -8,6 +8,12 @@ local FederationManager = activerdf.FederationManager
 local Query = activerdf.Query
 local table = activerdf.table
 
+local function dotest(test)
+	setup()
+	test()
+	teardown()
+end
+
 -- TestFederationManager
 function setup()
 	ConnectionPool.clear()
@@ -37,7 +43,7 @@ function test_class_add()
 	local write1 = get_write_adapter()
 	FederationManager.add(eyal, age, age_number)
 
-	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()
+	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()[1]
 	assert ("27" == age_result)
 end
 
@@ -144,13 +150,11 @@ function test_federated_query()
 	assert ( first == uniq )
 end
 
-setup()
---test_class_add()
-test_class_add_no_write_adapter()
+test_class_add()
+dotest(test_class_add_no_write_adapter)
 --test_class_add_one_write_one_read()
 --test_class_add_two_write()
 --test_class_add_two_write_switching()
 --test_federated_query()
 --test_get_different_read_and_write_adapters()
-test_single_pool()
-teardown()
+dotest(test_single_pool)

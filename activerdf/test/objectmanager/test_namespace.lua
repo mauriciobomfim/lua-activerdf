@@ -13,12 +13,6 @@ local Rdfs = 'http://www.w3.org/2000/01/rdf-schema#'
 local RdfType = RDFS.Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type')
 local RdfsResource = RDFS.Resource('http://www.w3.org/2000/01/rdf-schema#Resource')
 
-function setup()
-end
-
-function teardown()
-end
-
 function test_default_ns_expansion()
 	local rdftype = RdfType
 	local rdfsresource = RdfsResource
@@ -75,11 +69,9 @@ function test_attributes()
 	assert ( foafname == activerdf.FOAF.name )
 end
 
-setup()
 test_attributes()
 test_class_localname()
 test_class_register()
 test_default_ns_expansion()
 test_find_prefix()
 test_registration_of_rdf_and_rdfs()
-teardown()

@@ -7,6 +7,14 @@ local Namespace = activerdf.Namespace
 local RDFS = activerdf.RDFS
 local adapter
 local yeal
+local table = activerdf.table
+local oo = activerdf.oo
+
+local function dotest(test)
+	setup()
+	test()
+	teardown()
+end
 
 local TEST_PATH = 'lua/activerdf/test/'
 
@@ -15,8 +23,7 @@ function setup()
 	ConnectionPool.clear()
 	adapter = get_adapter()
 	adapter:load ( TEST_PATH .. "test_person_data.nt" )
-	Namespace.register('test', 'http://activerdf.org/test/')
-	
+	Namespace.register('test', 'http://activerdf.org/test/')	
 	eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
 end
 
@@ -39,7 +46,6 @@ function test_eyal_predicates()
 	table.foreach ( {'age', 'eye', 'type'}, function(i,pr) 
 		assert ( table.any ( preds, function(i, uri) return string.find(uri, ".*"..pr.."$") end ), "Eyal should have predicate "..pr )														  
 	end)
-
 	-- test class level predicates
 	local class_preds = table.map ( eyal:class_level_predicates(), function(i,p) return p.uri end )
 	-- eyal.type: person and resource, has predicates age, eye
@@ -48,30 +54,30 @@ function test_eyal_predicates()
 end
 
 function test_eyal_types()
-	local types = eyal:type()
+	local types = eyal:type()	
 	assert ( 2 == table.getn ( types ) )
 	assert ( table.include ( types, activerdf.TEST.Person ) )
-	assert ( table.include ( types, activerdf.RDFS.Resource) )
+	assert ( table.include ( types, activerdf.RDFS.Resource ) )
 end
 
 function test_eyal_age()
-	-- triple exists '<eyal> age 27'
+	-- triple exists '<eyal> age 27'	
 	assert ( 27 == eyal.age )
 	assert ( 27 == eyal.test.age ) -- verify
-	assert ( activerdf.table.equals ( {27} , eyal:all_age() ) )
+	assert ( activerdf.table.equals ( {27} , eyal.all_age ) )
 
 	-- Person has property car, but eyal has no value for it
 	assert ( nil == eyal.car )
 	assert ( nil == eyal.test.car )
-	assert ( activerdf.table.equals ( {}, eyal:all_test().car ) )
+	assert ( activerdf.table.equals ( {}, eyal.all_test.car ) )
 
 	-- non-existent method should throw error
 	assert ( nil == eyal.non_existing_method )
 end
 
 function test_eyal_type()
-	assert ( oo.instance_of ( eyal, RDFS.Resource ) )
-	assert ( oo.instance_of ( eyal, activerdf.TEST.Person ) )
+	assert ( oo.instanceof ( eyal, RDFS.Resource ) )
+	assert ( oo.instanceof ( eyal, activerdf.TEST.Person ) )
 end
 
 function test_find_options()
@@ -88,7 +94,8 @@ function test_find_options()
 	table.sort(found)	
 	assert ( activerdf.table.equals ( properties, found ) )
 
-	found = RDFS.Resource:find( { where = { [RDFS.domain] = RDFS.Resource, prop = 'any'} } )
+	found = RDFS.Resource:find( { where = { [RDFS.domain] = RDFS.Resource, ['?prop'] = '?any'} } )	
+	
 	table.sort(found)	
 	assert ( activerdf.table.equals ( properties, found ) )
 
@@ -97,16 +104,16 @@ function test_find_options()
 end
 
 function test_find_methods()
-	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_eye('blue') ) )
-	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test():eye('blue') ) )
+	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_eye('blue') ) )	
+	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test().eye('blue') ) )
 
 	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_age(27) ) )
-	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test():age(27) ) )
+	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test().age(27) ) )
 
 	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_age_and_eye(27, 'blue') ) )
-	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test():age_and_test():eye(27, 'blue') ) )
-	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test():age_and_eye(27, 'blue') ) )
-	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_age_and_test():eye(27, 'blue') ) )
+	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test().age_and_test().eye(27, 'blue') ) )
+	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_test().age_and_eye(27, 'blue') ) )
+	assert ( activerdf.table.equals ( {eyal}, RDFS.Resource:find_by_age_and_test().eye(27, 'blue') ) )
 end
 
 -- test for writing if no write adapter is defined (like only sparqls)
@@ -118,7 +125,7 @@ end
 
 function test_finders_with_options()
 	ConnectionPool.clear()
-	local adapter = get_adapter
+	local adapter = get_adapter()
 	local file_one = TEST_PATH .. "small-one.nt"
 	local file_two = TEST_PATH .. "small-two.nt"
 	adapter:load ( file_one )
@@ -144,15 +151,14 @@ function test_finders_with_options()
 	assert ( 1 == table.getn ( RDFS.Resource:find_by_eye_and_rdf():type('blue', RDFS.Resource, { context = one } ) ) )
 end
 
-setup()
-test_class_predicates()
-test_eyal_age()
---test_eyal_predicates()
---test_eyal_type()
---test_eyal_types()
---test_find_all_instances()
---test_find_methods()
---test_find_options()
---test_finders_with_options()
---test_write_without_write_adapter()
-teardown()
+
+dotest(test_class_predicates)
+dotest(test_eyal_age)
+dotest(test_eyal_predicates)
+dotest(test_eyal_type)
+dotest(test_eyal_types)
+dotest(test_find_all_instances)
+--dotest(test_find_methods)
+dotest(test_find_options)
+--dotest(test_finders_with_options)
+dotest(test_write_without_write_adapter)

@@ -4,7 +4,6 @@ local string = require 'activerdf.string'
 local md5 = require 'md5'
 local error = error
 local type = type
-local print = print
 local unpack = unpack
 local tostring = tostring
 local getmetatable = getmetatable
@@ -60,7 +59,7 @@ end
 Resource.class_uri = Namespace.lookup('rdfs', 'Resource')
 
 function Resource.uri(self)
-	return self.class_uri.uri	
+	return self.class_uri.uri
 end
 
 --local mt = getmetatable(oo.getclass(RDFS.Resource))
@@ -178,9 +177,9 @@ end
 
 function Resource.send(self, method)		
 	if type(method) == 'string' then	
-		--if Resource[method] then						
+		--if Resource[method] then					
 --			return Resource[method]
-		--end		
+	--	end
 		if oo.isclass(self) and oo.subclassof(self, Resource) then
 			-- manages invocations such as Person.find_by_name, 
 			-- Person.find_by_foaf::name, Person.find_by_foaf::name_and_foaf::knows, etc.
@@ -189,12 +188,11 @@ function Resource.send(self, method)
 				--$activerdflog.debug "constructing dynamic finder for #{method}"
 				-- construct proxy to handle delayed lookups 
 				-- (find_by_foaf::name_and_foaf::age)				
-				return function(self, ...)				
+				return function(self, ...)							
 					local proxy = DynamicFinderProxy(capture, nil, ...)
-
 					-- if proxy already found a value (find_by_name) we will not get a more 
 					-- complex query, so return the value. Otherwise, return the proxy so that 
-					-- subsequent lookups are handled
+					-- subsequent lookups are handled					
 					return proxy.value or proxy
 				end
 			end	
@@ -202,6 +200,8 @@ function Resource.send(self, method)
 	end
 	
 end
+
+getmetatable(Resource).__index = Resource.send
 
 --#####                         #####
 --##### instance level methods	#####
@@ -231,7 +231,7 @@ function Resource:find(...)
 		query:where('s?', sort_predicate, '?sort_value')
 	end
 
-	if options['where'] then		
+	if options['where'] then 				
 		if type(options['where']) ~= 'table' then
 			error("where clause should be lua table of predicate = object" )
 		end
@@ -265,7 +265,7 @@ function Resource:localname()
 end
 
 -- manages invocations such as eyal.age
-function Resource:__index(method, ...)					
+function Resource:__index(method, ...)				
 	if type(method) == 'string' then		
 		if Resource[method] then						
 			return Resource[method]
@@ -480,7 +480,7 @@ end
 -- resource
 function Resource:class_level_predicates()	
 	local type = Namespace.lookup('rdf', 'type')
-	local domain = Namespace.lookup('rdfs', 'domain')	
+	local domain = Namespace.lookup('rdfs', 'domain')		
 	return Query():distinct('?p'):where(self,type,'?t'):where('?p', domain, '?t'):execute() or {}
 end
 
@@ -597,7 +597,7 @@ function DynamicFinderProxy:__init(find_string, where, ...)
 	return obj
 end
 
-function DynamicFinderProxy:__index(method, ...)
+function DynamicFinderProxy:__index(method, ...)	
 	if(type(method) == 'string') then
 		if DynamicFinderProxy[method] then
 			return DynamicFinderProxy[method]
@@ -621,7 +621,7 @@ end
 -- private 
 -- split find_string by occurrences of _and_
 function DynamicFinderProxy:parse_attributes(str, ...)
-	local args = {...}
+	local args = {...}	
 	local attributes = string.split(str, '_and_')
 	table.foreach(attributes, function(index, atr)
 		-- attribute can be:

@@ -14,6 +14,7 @@ local NTriplesParser = activerdf.NTriplesParser
 local Namespace = activerdf.Namespace
 local Query = activerdf.Query
 local ConnectionPool = activerdf.ConnectionPool
+local ObjectManager = activerdf.ObjectManager
 local io = io
 local string = string
 local type = type
@@ -22,13 +23,7 @@ local error = error
 local tonumber = tonumber
 local math = math
 local next = next
-local print = print
-
---require 'federation/connection_pool'
---require 'uuidtools'
---require 'queryengine/ntriples_parser'
---require 'open-uri'
---require 'mime/types'
+local ipairs = ipairs
 
 --$activerdflog.info "loading RDFLite adapter"
 
@@ -50,8 +45,8 @@ local spoc_index = function(index)
 	return math.fmod ( index - 1, 4 ) + 1
 end
 
-local alias_number = function(index)
-	return math.floor ( ( index - 1 )/ 4 )
+local alias_number = function(index)	
+	return math.floor ( ( index - 1 ) / 4 )
 end
 -----------------------------------------------------------------------------
 -- Prepares a SQL statement using placeholders.
@@ -327,10 +322,9 @@ function RDFLite:query(query)
 	
 	-- construct query clauses
 	local sql, conditions = self:translate(query)
-	
-	-- executing query, passing all where-clause values as parameters (so that 
-	-- sqlite will encode quotes correctly)
 		
+	-- executing query, passing all where-clause values as parameters (so that 
+	-- sqlite will encode quotes correctly)	
 	local row = {}
 	local results = {}	
 	local cur, err = self.db:execute(prepare(sql, unpack(conditions)))	
@@ -368,7 +362,7 @@ function RDFLite:construct_select(query)
 	if query._ask then
 		return "select count(*)"
 	end
-	
+
 	-- add select terms for each selectclause in the query
 	-- the term names depend on the join conditions, e.g. t0.s or t1.p
 	local select = table.map ( query.select_clauses, function (i,term)				
@@ -422,15 +416,14 @@ end
 -- one, we skip the rest of the variables in this clause.
 function RDFLite:construct_join(query)
 	
-	local join_stmt = ''
-
+	local join_stmt = ''	
 	-- no join necessary if only one where clause given
 	if table.getn(query.where_clauses) == 1 then
 		return ' from triple as t0 '
 	end
-
-	local where_clauses = table.flatten(query.where_clauses)
-	local considering = table.select ( table.uniq ( where_clauses ), function(i,w) return string.find(w, '^?') end)
+	
+	local where_clauses = ObjectManager.flatten(query.where_clauses)
+	local considering = table.select ( table.uniq ( where_clauses ), function(i,w) if type(w) == 'string' then return string.find(w, '^?') end end)
 	
 	-- constructing hash with indices for all terms
 	-- e.g. {?s => [1,3,5], ?p => [2], ... }
@@ -440,7 +433,7 @@ function RDFLite:construct_join(query)
 		local ary = term_occurrences[term]
 		table.insert( ary , index )
 	end)
-
+	
 	local aliases = {}
 	local index, term = next(where_clauses)
 	while(term) do
@@ -521,6 +514,13 @@ end
 
 	-- construct where clause
 function RDFLite:construct_where(query)	
+	table.foreach(query.where_clauses, function(i,w) 
+		w[1] = w[1] or 'nil'
+		w[2] = w[2] or 'nil'
+		w[3] = w[3] or 'nil'
+		w[4] = w[4] or 'nil'
+	end)
+	
 	-- collecting where clauses, these will be added to the sql string later
 	local where = {}
 	local conditions
@@ -528,8 +528,7 @@ function RDFLite:construct_where(query)
 	-- collecting all the right-hand sides of where clauses (e.g. where name = 
 	-- 'abc'), to add to query string later using ?-notation, because then 
 	-- sqlite will automatically encode quoted literals correctly
-	local right_hand_sides = {}
-
+	local right_hand_sides = {}	
 	-- convert each where clause to SQL:
 	-- add where clause for each subclause, except if it's a variable		
 	table.foreach ( query.where_clauses, function ( level, clause )		
@@ -537,9 +536,9 @@ function RDFLite:construct_where(query)
 		if not type(clause) == 'table' then
 			error ( "where clause "..clause.." is not a triple" )
 		end
-		table.foreach ( clause, function ( i, subclause )
+		table.foreach ( clause, function ( i, subclause )			
 			-- dont add where clause for variables			
-			if not ( string.find( tostring(subclause), '^?') or subclause == nil ) then				
+			if not ( string.find( tostring(subclause), '^?') or subclause == nil or subclause == 'nil') then				
 				conditions = self:compute_where_condition( i, subclause, query.reasoning and self.reasoning )
 				if table.getn(conditions) == 1 then
 					table.insert ( where , "t"..( level - 1 ).."."..SPOC[i].." = %s" )
@@ -602,7 +601,17 @@ function RDFLite:compute_where_condition(index, subclause, reasoning)
 	end
 
 	-- convert conditions into internal format
-	return table.map ( conditions, function ( i, c ) return ( c['uri'] and "<"..c.uri..">" or tostring(c) ) end )
+	return table.map ( conditions, function ( i, c )
+										local uri
+										if type ( c['uri'] ) == 'function' then
+											uri = "<"..c:uri()..">"
+										elseif c['uri'] then
+											uri = "<"..c.uri..">"
+										else
+											uri = tostring(c)
+										end																			
+										return uri 
+								   end)
 end
 
 function RDFLite:subproperties(self, resource)
@@ -625,9 +634,10 @@ end
 
 -- returns sql variable name for a queryterm
 function RDFLite:variable_name(query,term)
+	
 	-- look up the first occurence of this term in the where clauses, and compute 
 	-- the level and s/p/o position of it
-	local index = table.index ( table.flatten ( query.where_clauses ), term )
+	local index = table.index ( ObjectManager.flatten ( query.where_clauses ), term )
 	
 	if index == nil then
 		-- term does not appear in where clause

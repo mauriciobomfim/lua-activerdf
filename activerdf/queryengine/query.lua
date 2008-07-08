@@ -5,7 +5,6 @@ local unpack = unpack
 local tostring = tostring
 local tonumber = tonumber
 local pairs = pairs
-local print = print
 
 module "activerdf"
 
@@ -155,7 +154,7 @@ end
 -- Adds where clauses (s,p,o) where each constituent is either variable ('?s') or 
 -- an RDFS.Resource. Keyword queries are specified with the special 'keyword'
 -- symbol: Query.new.select('?s').where('?s', 'keyword', 'eyal')
-function Query:where(s,p,o,c)		
+function Query:where(s,p,o,c)
 	if p == '?keyword' then
 		-- treat keywords in where-clauses specially
 		self:keyword_where(s,o)
@@ -172,7 +171,7 @@ function Query:where(s,p,o,c)
 		end
 		if not ( oo.instanceof(s, RDFS.Resource) or oo.subclassof(s, RDFS.Resource) or (type(s) == 'string') ) then			
 			error ("cannot add a where clause with p "..tostring(p)..": p must be a resource or a variable")
-		end		
+		end
 		table.insert(self.where_clauses, table.map({s,p,o,c}, function(index, arg) return self:parametrise(arg) end))
 	end
 	return self

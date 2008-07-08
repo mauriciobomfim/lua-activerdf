@@ -20,7 +20,7 @@ ObjectManager.__flatten = function (t,f,complete)
 			 if (complete or type(v[1]) == "table") then
 				  ObjectManager.__flatten(v,f,complete)				  				  
 			 else
-				  f[#f+1] = v				  
+				  f[#f+1] = v		  
 			 end
 		else			
 			 f[#f+1] = v

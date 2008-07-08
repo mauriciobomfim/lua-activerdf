@@ -8,13 +8,6 @@ local Query2SPARQL = activerdf.Query2SPARQL
 local Query = activerdf.Query
 
 -- TestQueryEngine
-
-function setup()
-end
-
-function teardown()
-end
-
 function test_sparql_generation()
 
     -- TODO: write tests for distinct, ask
@@ -50,7 +43,5 @@ function test_query_omnipotent()
     assert ( Query2SPARQL.translate(q1) == Query2SPARQL.translate(q2) )
 end
 
-setup()
 test_query_omnipotent()
 test_sparql_generation()
-teardown()

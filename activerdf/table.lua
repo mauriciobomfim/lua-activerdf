@@ -4,7 +4,6 @@ local setmetatable = setmetatable
 local table = table
 local type = type
 local unpack = unpack
-local print = print
 local next = next
 local getmetatable = getmetatable
 
@@ -133,7 +132,7 @@ all = function(tbl, func)
 end
 
 include = function(tbl, value)
-	local r = table.foreachi(tbl, function(i,v) if v == value then return true end end)
+	local r = table.foreachi(tbl, function(i,v) if value == v then return true end end)
 	return r or false
 end
 

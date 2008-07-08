@@ -6,6 +6,12 @@ require 'activerdf.test.common'
 local ConnectionPool = activerdf.ConnectionPool
 local Namespace = activerdf.Namespace
 
+local function dotest(test)
+	setup()
+	test()
+	teardown()
+end
+
 -- TestAdapter
 function setup()
 	ConnectionPool.clear()
@@ -55,7 +61,5 @@ function test_update_value()
 	assert ( eyal.age == 40 )
 end
 
-setup()
-test_ensure_adapter_behaviour()
---test_update_value()
-teardown()
+dotest(test_ensure_adapter_behaviour)
+dotest(test_update_value)

@@ -6,12 +6,6 @@ local NTriplesParser = activerdf.NTriplesParser
 local table = activerdf.table
 local RDFS = activerdf.RDFS
 
-function setup()
-end
-
-function teardown()
-end
-
 function test_simple_triples()
     local str = [[
 <http://www.johnbreslin.com/blog/author/cloud/#foaf> <http://xmlns.com/foaf/0.1/surname> "Breslin" .
@@ -67,9 +61,7 @@ function test_datatypes()
     -- assert ( triples[4][3] == DateTime.parse('2002-10-10T00:00:00+13')
 end
 
-setup()
 test_datatypes()
 test_encoded_content()
 test_escaped_quotes()
 test_simple_triples()
-teardown()
