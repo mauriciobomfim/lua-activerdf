@@ -126,8 +126,12 @@ any = function(tbl, func)
 	return table.foreach(tbl, func)
 end
 
+-- Passes each element of the table to the given function.
+-- The method returns true if the function never returns false or nil.
+-- If the function is not given, it adds an implicit function(i,obj) return obj end 
+-- (that is table.all() will return true only if none of the table members are false or nil.) 
 all = function(tbl, func)
-	local func = func or function(i,v) return v end		
+	local func = func or function(i,obj) return obj end		
 	return table.getn(map(tbl, func)) == table.getn(tbl)
 end
 

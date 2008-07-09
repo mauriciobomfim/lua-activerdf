@@ -94,9 +94,9 @@ function SparqlAdapter:query(query, block)
 		result = self:query_cache(qs)
       if not result then
          -- $activerdflog.debug "cache miss for query #{qs}"
-		else
-			-- $activerdflog.debug "cache hit for query #{qs}"
-			return result
+      else
+		 -- $activerdflog.debug "cache hit for query #{qs}"
+		 return result
       end
 	end
 
@@ -136,7 +136,7 @@ function SparqlAdapter:execute_sparql_query(qs, header, block)
 	elseif self.request_method == 'post' then
 		--$activerdflog.debug "POST #@url with #{qs}"
       res_request, err = http.request({ url = url, sink = ltn12.sink.table(t_response), redirect = true, headers = header, method = 'post' })
-   end
+    end
 	
 	if err == "timeout" then		
 		-- raise ActiveRdfError, "timeout on SPARQL endpoint"

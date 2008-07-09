@@ -1,6 +1,5 @@
 local type = type
 local error = error
-local print = print
 
 module "activerdf"
 

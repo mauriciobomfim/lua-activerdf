@@ -1,5 +1,4 @@
 local table = activerdf.table
-local print = print
 local error = error
 
 module "activerdf"

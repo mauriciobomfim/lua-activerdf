@@ -5,6 +5,7 @@ local unpack = unpack
 local tostring = tostring
 local tonumber = tonumber
 local pairs = pairs
+local error = error
 
 module "activerdf"
 
@@ -85,7 +86,7 @@ function Query:filter(...)
 	local s = {...}
 	-- add filter clauses
 	table.insert(self.filter_clauses, s)
-	table.uniq(filter_clauses)
+	table.uniq(self.filter_clauses)
 	return self
 end
 

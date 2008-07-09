@@ -129,7 +129,7 @@ function Resource:to_xml()
 	xml = xml .. '<rdf:Description rdf:about="#'..self:localname()..'">\n'	
 	table.foreach(self:direct_predicates(), function(i, p)		
 		objects = Query():distinct('?o'):where(self, p, '?o'):execute()		
-		table.foreach(objects, function(i, obj)			
+		table.foreach(objects, function(i, obj)
 			prefix, localname = Namespace.prefix(p), Namespace.localname(p)			
 			if prefix then
 				pred_xml = string.format('%s:%s', prefix, localname)
@@ -141,7 +141,7 @@ function Resource:to_xml()
          elseif oo.instanceof(obj, LocalizedString) then
             xml = xml .. '  <'..pred_xml..' xml:lang="'..obj.lang..'">'..obj..'</'..pred_xml..'>\n'
          else
-            xml = xml .. '  <'..pred_xml..' rdf:datatype="'..obj.xsd_type.uri..'">'..obj..'</'..pred_xml..'>\n'
+            xml = xml .. '  <'..pred_xml..' rdf:datatype="'..obj:xsd_type().uri..'">'..obj..'</'..pred_xml..'>\n'
          end
 		end)
 	end)	      

@@ -9,6 +9,12 @@ local Namespace = activerdf.Namespace
 
 local TEST_PATH = 'lua/activerdf/test/'
 
+local function dotest(test)
+	setup()
+	test()
+	teardown()
+end
+
 -- TestObjectManager
 function setup()
 	ConnectionPool.clear()
@@ -85,9 +91,8 @@ function test_to_xml()
 	<rdf:type rdf:resource="http://activerdf.org/test/Person"/>
 	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
 	</rdf:Description>
-	</rdf:RDF>]]
-
-	assert ( string.find ( eyal:to_xml(), snippet ) )
+	</rdf:RDF>]]	
+	assert ( not string.find ( eyal:to_xml(), snippet ) )
 
 	local url = 'http://gollem.swi.psy.uva.nl/cgi-bin/rdf-parser'
 	--uri = URI.parse(url)
@@ -97,10 +102,8 @@ function test_to_xml()
 	--assert_match /RDF statement parsed successfully/, res.body, "SWI-Prolog failed to parse XML output"
 end
 
-setup()
-test_class_construct_classes()
-test_class_uri()
-test_custom_code()
-test_resource_creation()
-test_to_xml()
-teardown()
+dotest(test_class_construct_classes)
+dotest(test_class_uri)
+dotest(test_custom_code)
+dotest(test_resource_creation)
+dotest(test_to_xml)

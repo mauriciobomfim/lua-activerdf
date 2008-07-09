@@ -34,7 +34,7 @@ end
 
 -- concatenate filters in query
 function Query2SPARQL.filter_clauses(query)
-	if not table.empty(query.filter_clauses) then
+	if query.filter_clauses and not table.empty(query.filter_clauses) then			
 		return "FILTER ("..table.concat(query.filter_clauses, " && ")..")"
 	end
 	return ""

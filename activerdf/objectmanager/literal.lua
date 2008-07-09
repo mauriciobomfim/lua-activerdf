@@ -49,7 +49,7 @@ end
 
 --class String; include Literal; end
 local strmt = getmetatable(oldstring)
-if strmt then
+if strmt then	
 	if strmt.__index then
 		setmetatable(strmt.__index, { __index = Literal })
 	else

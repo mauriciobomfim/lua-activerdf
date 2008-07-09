@@ -1,33 +1,38 @@
-# Author:: Eyal Oren
-# Copyright:: (c) 2005-2006
-# License:: LGPL
+require 'activerdf'
 
-require 'rubygems'
-require 'test/unit'
-require 'active_rdf'
+local ConnectionPool = activerdf.ConnectionPool
 
-class TestFetchingAdapter < Test::Unit::TestCase
-  def setup
-    ConnectionPool.clear
-    @adapter = ConnectionPool.add(:type => :fetching)
-  end
-
-  def teardown
-  end
-
-  def test_parse_foaf    
-    @adapter.fetch("http://eyaloren.org/foaf.rdf#me")
-    assert @adapter.size > 0
-  end
-  
-  def test_sioc_schema
-    @adapter.fetch("http://rdfs.org/sioc/ns#")
-    assert_equal 560, @adapter.size 
-  end
-    
-  def test_foaf_schema
-    @adapter.fetch("http://xmlns.com/foaf/0.1/")
-    # foaf contains 563 triples but with two duplicates
-    assert_equal 561, @adapter.size    
-  end
+local function dotest(test)
+	setup()
+	test()
+	teardown()
 end
+
+-- TestFetchingAdapter
+function setup()
+    ConnectionPool.clear()
+    adapter = ConnectionPool.add { type = 'fetching' }
+end
+
+function teardown()
+end
+
+function test_parse_foaf()    
+	adapter:fetch("http://eyaloren.org/foaf.rdf#me")
+    assert ( adapter:size() > 0 )
+end
+  
+function test_sioc_schema()
+    adapter:fetch("http://rdfs.org/sioc/ns#")
+    assert ( 560 == adapter:size() ) 
+end
+    
+function test_foaf_schema()
+    adapter:fetch("http://xmlns.com/foaf/0.1/")
+    -- foaf contains 563 triples but with two duplicates
+    assert ( 561 == adapter:size() )    
+end
+
+dotest(test_parse_foaf)
+dotest(test_sioc_schema)
+dotest(test_foaf_schema)
