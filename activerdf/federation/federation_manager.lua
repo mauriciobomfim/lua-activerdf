@@ -12,7 +12,7 @@ function FederationManager.add(s,p,o)
 	-- TODO: allow addition of full graphs	
 	if not ConnectionPool.write_adapter then 
 		error("cannot write without a write-adapter")
-	end
+	end	
 	return ConnectionPool.write_adapter:add(s,p,o)
 end
 

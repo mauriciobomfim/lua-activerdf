@@ -21,16 +21,17 @@ SuggestingAdapter = oo.class({}, FetchingAdapter)
 
 ConnectionPool.register_adapter( 'suggesting', SuggestingAdapter )
 
-local _old_initialize = __init
-	
+local _old_initialize = FetchingAdapter.__init
+
 -- initialises the adapter, see RDFLite for description of possible parameters.
 function SuggestingAdapter:__init(params)
-	_old_initialize(params)
-	db.execute('drop view if exists occurrence')
-	db.execute('create view occurrence as select p, count(distinct s) as count from triple group by p')
+	obj = _old_initialize(params)
+	obj.db:execute('drop view if exists occurrence')
+	obj.db:execute('create view occurrence as select p, count(distinct s) as count from triple group by p')
 
-	db.execute('drop view if exists cooccurrence')
-	db.execute('create view cooccurrence as select t0.p as p1,t1.p as p2, count(distinct t0.s) as count from triple as t0 join triple as t1 on t0.s=t1.s and t0.p!=t1.p group by t0.p, t1.p')
+	obj.db:execute('drop view if exists cooccurrence')
+	obj.db:execute('create view cooccurrence as select t0.p as p1,t1.p as p2, count(distinct t0.s) as count from triple as t0 join triple as t1 on t0.s=t1.s and t0.p!=t1.p group by t0.p, t1.p')
+	return obj
 end
 
   -- suggests additional predicates that might be applicable for the given resource

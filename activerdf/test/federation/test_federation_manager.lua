@@ -40,7 +40,7 @@ function test_single_pool()
 end
 
 function test_class_add()
-	local write1 = get_write_adapter()
+	local write1 = get_write_adapter()	
 	FederationManager.add(eyal, age, age_number)
 
 	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()[1]
@@ -64,7 +64,7 @@ function test_class_add_one_write_one_read()
 
 	FederationManager.add(eyal, age, age_number)
 
-	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()
+	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()[1]
 	assert ( "27" == age_result )
 	
 end
@@ -87,12 +87,11 @@ function test_class_add_two_write()
 	
 	local write1 = get_write_adapter()
 	local write2 = get_different_write_adapter(write1)
-
 	local read1 = get_read_only_adapter()
 
 	FederationManager.add(eyal, age, age_number)
 
-	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()
+	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()[1]
 	assert ( "27" == age_result )
 end
 
@@ -105,23 +104,23 @@ function test_class_add_two_write_switching()
 	local read1 = get_read_only_adapter()
 
 	FederationManager.add(eyal, age, age_number)
-	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()
+	local age_result = Query():select('?o'):where(eyal, age, '?o'):execute()[1]
 	assert ( "27" == age_result )
 
 	ConnectionPool.write_adapter = write2
 
 	FederationManager.add(eyal, eye, eye_value)
-	age_result = Query():select('?o'):where(eyal, eye, '?o'):execute()
+	age_result = Query():select('?o'):where(eyal, eye, '?o'):execute()[1]
 	assert ( "blue" == age_result )
 
-	local second_result = write2:query(Query():select('?o'):where(eyal, eye, '?o'))
+	local second_result = write2:query(Query():select('?o'):where(eyal, eye, '?o'))[1]
 	assert ( "blue" == second_result )
 end
 
 -- this test makes no sense without two different data sources
 function test_federated_query()
 	local first_adapter = get_write_adapter()
-	first_adapter.load("lua/activerdf/test/test_person_data.nt")
+	first_adapter:load("lua/activerdf/test/test_person_data.nt")
 	local first = Query():select('?s','?p','?o'):where('?s','?p','?o'):execute()
 
 	-- results should not be empty, because then the test succeeds trivially
@@ -130,15 +129,15 @@ function test_federated_query()
 
 	ConnectionPool.clear()
 	local second_adapter = get_different_write_adapter(first_adapter)
-	second_adapter.load("lua/activerdf/test/test_person_data.nt")
+	second_adapter:load("lua/activerdf/test/test_person_data.nt")
 	second = Query():select('?s','?p','?o'):where('?s','?p','?o'):execute()
 
 	-- now we query both adapters in parallel
 	ConnectionPool.clear()
 	first_adapter = get_write_adapter()
-	first_adapter.load("lua/activerdf/test/test_person_data.nt")
+	first_adapter:load("lua/activerdf/test/test_person_data.nt")
 	second_adapter = get_different_write_adapter(first_adapter)
-	second_adapter.load("lua/activerdf/test/test_person_data.nt")
+	second_adapter:load("lua/activerdf/test/test_person_data.nt")
 	local both = Query():select('?s','?p','?o'):where('?s','?p','?o'):execute()
 	-- assert both together contain twice the sum of the separate sources
 	assert ( table.equals(table.add(first, second),  both) )
@@ -150,11 +149,11 @@ function test_federated_query()
 	assert ( first == uniq )
 end
 
-test_class_add()
+dotest(test_class_add)
 dotest(test_class_add_no_write_adapter)
---test_class_add_one_write_one_read()
---test_class_add_two_write()
---test_class_add_two_write_switching()
---test_federated_query()
---test_get_different_read_and_write_adapters()
+dotest(test_class_add_one_write_one_read)
+dotest(test_class_add_two_write)
+dotest(test_class_add_two_write_switching)
+dotest(test_federated_query)
+dotest(test_get_different_read_and_write_adapters)
 dotest(test_single_pool)

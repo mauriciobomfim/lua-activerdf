@@ -12,6 +12,8 @@ local function dotest(test)
 	teardown()
 end
 
+local TEST_PATH = 'lua/activerdf/test/'
+
 -- TestAdapter
 function setup()
 	ConnectionPool.clear()
@@ -42,7 +44,7 @@ end
 
 function test_update_value()
 	local adapter = get_write_adapter()
-	adapter:load ("test_person_data.nt")
+	adapter:load ( TEST_PATH .. "test_person_data.nt")
 
 	Namespace.register('test', 'http://activerdf.org/test/')
 	local eyal = Namespace.lookup('test', 'eyal')

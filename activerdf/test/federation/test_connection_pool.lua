@@ -8,6 +8,12 @@ local ConnectionPool = activerdf.ConnectionPool
 local ActiveRdfAdapter = activerdf.ActiveRdfAdapter
 local table = activerdf.table
 
+local function dotest(test)
+	setup()
+	test()
+	teardown()
+end
+
 -- TestConnectionPool 
 function setup()
 	ConnectionPool.clear()
@@ -66,12 +72,10 @@ function test_class_write_adapter_equals()
 	assert ( adapter1 == ConnectionPool.write_adapter )
 end
 
-setup()
-test_class_adapter_pool()	
-test_class_add_data_source()	
-test_class_auto_flush_equals()	
-test_class_clear()	
-test_class_register_adapter()	
---test_class_write_adapter()	
---test_class_write_adapter_equals()	
-teardown()
+dotest(test_class_adapter_pool)	
+dotest(test_class_add_data_source)	
+dotest(test_class_auto_flush_equals)	
+dotest(test_class_clear)
+dotest(test_class_register_adapter)
+dotest(test_class_write_adapter)
+dotest(test_class_write_adapter_equals)

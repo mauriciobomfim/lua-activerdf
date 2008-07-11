@@ -32,18 +32,18 @@ end
 function get_different_adapter(existing_adapter)
 	local types = ConnectionPool.adapter_types()
 	if table.include(types, 'rdflite') then
-		if oo.class(existing_adapter) == activerdf.adapters.rdflite.RDFLite then
+		if oo.classof(existing_adapter) == activerdf_rdflite.RDFLite then
 			return ConnectionPool.add { type = 'rdflite', unique = true }
 		else
 			return get_rdflite()
 		end
-	elseif table.include(types, 'redland') and oo.class(existing_adapter) ~= activerdf.adapters.redland.RedlandAdapter then
+	elseif table.include(types, 'redland') and oo.classof(existing_adapter) ~= activerdf.adapters.redland.RedlandAdapter then
 		return get_rdflite()
-	elseif table.include(types, 'sparql') and oo.class(existing_adapter) ~= activerdf.adapters.sparql.SparqlAdapter then
+	elseif table.include(types, 'sparql') and oo.classof(existing_adapter) ~= activerdf.adapters.sparql.SparqlAdapter then
 		return get_sparql()
-	elseif table.include(types, 'yars') and oo.class(existing_adapter) ~= activerdf.adapters.yars.YarsAdapter then
+	elseif table.include(types, 'yars') and oo.classof(existing_adapter) ~= activerdf.adapters.yars.YarsAdapter then
 		return get_yars()
-	elseif table.include(types, 'jars2') and oo.class(existing_adapter) ~= activerdf.adapters.jars2.Jars2Adapter then
+	elseif table.include(types, 'jars2') and oo.classof(existing_adapter) ~= activerdf.adapters.jars2.Jars2Adapter then
 		return get_jars2()
 	else		
 		error "only one adapter on this system, or no suitable adapter found for test"
@@ -79,16 +79,16 @@ end
 
 -- TODO use a list of exisiting adapters not only one
 function get_different_write_adapter(existing_adapter)
-	local types = ConnectionPool.adapter_types()
-	if table.include(types, 'rdflite') then
-		if oo.class(existing_adapter) == activerdf.adapters.rdflite.RDFLite then
+	local types = ConnectionPool.adapter_types()	
+	if table.include(types, 'rdflite') then		
+		if oo.classof(existing_adapter) == activerdf_rdflite.RDFLite then			
 			return ConnectionPool.add { type = 'rdflite', unique = true }
 		else
 			return get_rdflite()
 		end
-	elseif table.include(types, 'redland') and oo.class(existing_adapter) ~= activerdf.adapters.redland.RedlandAdapter then
+	elseif table.include(types, 'redland') and oo.classof(existing_adapter) ~= activerdf.adapters.redland.RedlandAdapter then
 		return get_redland()
-	elseif table.include(types, 'yars') and oo.class(existing_adapter) ~= activerdf.adapters.yars.YarsAdapter then
+	elseif table.include(types, 'yars') and oo.classof(existing_adapter) ~= activerdf.adapters.yars.YarsAdapter then
 		return get_yars()
 	else		
 		error "only one write adapter on this system, or no suitable write adapter found for test"

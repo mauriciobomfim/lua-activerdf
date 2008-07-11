@@ -2,8 +2,10 @@ require 'activerdf'
 require 'activerdf.federation.connection_pool'
 require 'activerdf.test.common'
 
-local ConnectionPool = activerdf.ConnectionPoll
+local ConnectionPool = activerdf.ConnectionPool
 local Namespace = activerdf.Namespace
+local RDFS = activerdf.RDFS
+
 -- TestResourceWriting 
 function setup()
 	ConnectionPool.clear()
@@ -23,3 +25,6 @@ function test_update_value()
 	eyal.ar.age = { 100, 80 }
 	assert ( activerdf.table.equals ( { 100, 80 }, eyal.ar.age ) )
 end
+
+setup()
+test_update_value()

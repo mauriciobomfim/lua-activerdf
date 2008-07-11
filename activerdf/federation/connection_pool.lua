@@ -131,12 +131,11 @@ end
 -- create new adapter from connection parameters
 function ConnectionPool.create_adapter(connection_params)
 	-- lookup registered adapter klass
-	local klass = ConnectionPool.registered_adapter_types[connection_params['type']]
-
+	local klass = ConnectionPool.registered_adapter_types[connection_params['type']]	
 	-- raise error if adapter type unknown
 	if klass == nil then
 		error("unknown adapter type "..connection_params['type'])
 	end
 	-- create new adapter-instance			
-	return klass(connection_params)		
+	return klass(connection_params)
 end

@@ -6,17 +6,20 @@ local string = activerdf.string
 local execute = os.execute
 local RDFS = activerdf.RDFS
 local oo = activerdf.oo
-
 module "activerdf_rdflite"
 
 FetchingAdapter = oo.class({}, RDFLite)
 
-ConnectionPool.register_adapter('fetching', 'FetchingAdapter')
+ConnectionPool.register_adapter('fetching', FetchingAdapter)
 
 	-- TODO: check that rapper is installed
 
 	-- fetches RDF/XML data from given url and adds it to the datastore, using the 
 	-- source url as context identifier.
+--function FetchingAdapter:__init(params)	
+--	return RDFLite:__init(params)
+--end
+
 function FetchingAdapter:fetch ( url )
     -- check if url starts with http://
     if not url:match('http:\/\/(.*)') then

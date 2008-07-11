@@ -15,6 +15,7 @@ local Namespace = activerdf.Namespace
 local Query = activerdf.Query
 local ConnectionPool = activerdf.ConnectionPool
 local ObjectManager = activerdf.ObjectManager
+local ActiveRdfAdapter = activerdf.ActiveRdfAdapter
 local io = io
 local string = string
 local type = type
