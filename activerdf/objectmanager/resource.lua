@@ -340,30 +340,31 @@ function Resource:__index(method, ...)
 				Resource.subject = self
 				Resource.flatten = flatten
 
-				-- catch the invocation on the namespace
-				local method_missing = function(self, localname, ...)
+				-- catch the reading invocation on the namespace
+				local __index = function(self, localname, ...)
 					local values = {...}
-					local predicate					
-					-- check if updating or reading predicate value								
-					local update = string.find(localname, '^set')
-					if update then
-						predicate = Namespace.lookup(Resource.uri, localname)
-						return Resource.subject:set_predicate(predicate, values)
-					else
-						predicate = Namespace.lookup(Resource.uri, localname)
-						return Resource.subject:get_predicate(predicate, Resource.flatten)
-					end					
+					local predicate				
+					predicate = Namespace.lookup(Resource.uri, localname)
+					return Resource.subject:get_predicate(predicate, Resource.flatten)										
 				end
 				
-				setmetatable(namespace, { __index = method_missing })
+				-- catch the updating invocation on the namespace				
+				local __newindex = function(self, localname, ...)
+					local values = {...}
+					local predicate		
+					predicate = Namespace.lookup(Resource.uri, localname)
+					return Resource.subject:set_predicate(predicate, values)									
+				end
+				
+				setmetatable(namespace, { __index = __index, __newindex = __newindex })
 				--private(:type)
 				--end
 				return namespace
 			end
 			
 			local candidates
-			if update then
-				candidates = table.uniq(table.insert(self:class_level_predicates(), self:direct_predicates()))
+			if update then				
+				candidates = table.uniq(table.add(self:class_level_predicates(), self:direct_predicates()))
 			else
 				candidates = self:direct_predicates()			
 			end
@@ -429,6 +430,173 @@ function Resource:__index(method, ...)
 	end			
 	return nil
 end
+
+-- manages invocations such as eyal.age
+function Resource:__newindex(method, ...)	
+	print('entrei', method)			
+	if type(method) == 'string' then		
+		if Resource[method] then						
+			return Resource[method]
+		end
+
+		if oo.instanceof(self, Resource) then			
+			-- possibilities:
+			-- 1. eyal.age is a property of eyal (triple exists <eyal> <age> "30")
+			-- evidence: eyal age ?a, ?a is not nil (only if value exists)
+			-- action: return ?a
+			--
+			-- 2. eyal's class is in domain of age, but does not have value for eyal
+			-- explain: eyal is a person and some other person (not eyal) has an age
+			-- evidence: eyal type ?c, age domain ?c
+			-- action: return nil
+			--
+			-- 3. eyal.age = 30 (setting a value for a property)
+			-- explain: eyal has (or could have) a value for age, and we update that value
+			-- complication: we need to find the full URI for age (by looking at
+			-- possible predicates to use
+			-- evidence: eyal age ?o  (eyal has a value for age now, we're updating it)
+			-- evidence: eyal type ?c, age domain ?c (eyal could have a value for age, we're setting it)
+			-- action: add triple (eyal, age, 30), return 30
+			--
+			-- 4. eyal.age is a custom-written method in class Person
+			-- evidence: eyal type ?c, ?c.methods includes age
+			-- action: inject age into eyal and invoke
+			--
+			-- 5. eyal.age is registered abbreviation 
+			-- evidence: age in @predicates
+			-- action: return object from triple (eyal, @predicates[age], ?o)
+			--
+			-- 6. eyal.foaf::name, where foaf is a registered abbreviation
+			-- evidence: foaf in Namespace.
+			-- action: return namespace proxy that handles 'name' invocation, by 
+			-- rewriting into predicate lookup (similar to case (5)
+
+			-- $activerdflog.debug "method_missing: #{method}"
+
+			-- are we doing an update or not? 
+			-- checking if method ends with '='
+				
+			local args = {...}
+			local update = true
+			-- methodname = if update 
+			-- method.to_s[0..-2]
+			-- else
+			-- method.to_s
+			-- end
+			local methodname = method
+
+			-- extract single values from array unless user asked for eyal.all_age
+			local flatten = true
+			if string.sub(method,1,4) == 'all_' then
+				flatten = false
+				methodname = string.sub(methodname, 5,-1)
+			end
+			
+			-- check possibility (5)			 
+			if self.predicates[methodname] then
+				if update then
+					return self:set_predicate(self.predicates[methodname], args)
+				else					
+					return self:get_predicate(self.predicates[methodname])
+				end
+			end
+			
+			-- check possibility (6)
+			if table.include(Namespace.abbreviations(), methodname) then				
+				local namespace = {}
+				Resource.uri = methodname
+				Resource.subject = self
+				Resource.flatten = flatten
+
+				local __index = function(self, localname, ...)
+					local values = {...}
+					local predicate				
+					predicate = Namespace.lookup(Resource.uri, localname)
+					return Resource.subject:get_predicate(predicate, Resource.flatten)										
+				end
+				
+				-- catch the updating invocation on the namespace				
+				local __newindex = function(self, localname, ...)
+					local values = {...}
+					local predicate		
+					predicate = Namespace.lookup(Resource.uri, localname)
+					return Resource.subject:set_predicate(predicate, values)									
+				end
+				
+				setmetatable(namespace, { __index = method_missing, __newindex = __newindex })
+				--private(:type)
+				--end
+				return namespace
+			end
+			
+			local candidates
+			if update then
+				candidates = table.uniq(table.add(self:class_level_predicates(), self:direct_predicates()))
+			else
+				candidates = self:direct_predicates()			
+			end
+			
+			-- checking possibility (1) and (3)
+			local result = table.foreach(candidates, function(index, pred)				
+				if Namespace.localname(pred) == methodname then										
+					if update then
+						return self:set_predicate(pred, args)
+					else				
+						return self:get_predicate(pred, flatten)
+					end
+				end
+			end)
+				
+			if result then return result end
+			
+			--raise ActiveRdfError, "could not set #{methodname} to #{args}: no suitable 
+			--predicate found. Maybe you are missing some schema information?" if update
+			error("could not set"..methodname.." to "..tostring(args)..": no suitable predicate found. Maybe you are missing some schema information?")
+						
+			-- get/set attribute value did not succeed, so checking option (2) and (4)
+			
+			-- checking possibility (2), it is not handled correctly above since we use
+			-- direct_predicates instead of class_level_predicates. If we didn't find
+			-- anything with direct_predicates, we need to try the
+			-- class_level_predicates. Only if we don't find either, we
+			-- throw "method_missing"			
+			candidates = self:class_level_predicates()
+						
+			-- if any of the class_level candidates fits the sought method, then we
+			-- found situation (2), so we return nil or [] depending on the {:array =>
+			-- true} value			
+			if table.any(candidates, function(i,c) if Namespace.localname(c) == methodname then return true end end) then
+				if type(args[1]) == 'table' then
+					local return_ary = args[1]['array'] 
+				end
+				if return_ary then
+					return {}
+				else
+					return nil
+				end
+			end
+			-- checking possibility (4)
+			-- TODO: implement search strategy to select in which class to invoke
+			-- e.g. if to_s defined in Resource and in Person we should use Person
+			--$activerdflog.debug "RDFS::Resource: method_missing option 4: custom class method"
+			result = table.foreach(self:type(), function(index, klass)				
+				if type(klass[method]) == 'function' then					
+					local _dup = klass(uri)
+					return _dup[method](self, unpack(args))
+				end				
+			end)				
+			return result						
+		end	
+		-- if none of the three possibilities work out, we don't know this method
+		-- invocation, but we don't want to throw NoMethodError, instead we return
+		-- nil, so that eyal.age does not raise error, but returns nil. (in RDFS,
+		-- we are never sure that eyal cannot have an age, we just dont know the
+		-- age right now)			
+		return nil
+	end			
+	return nil
+end
+
 
 -- saves instance into datastore
 function Resource:save()
@@ -507,11 +675,11 @@ function Resource:__tostring()
 	return "<"..self.uri..">"
 end
 
-function Resource:set_predicate(predicate, values)
+function Resource:set_predicate(predicate, values)	
 	FederationManager.delete(self, predicate)
 	table.foreach(table.flatten(values), function(i, v) 
-														FederationManager.add(self, predicate, v)
-													 end)
+											FederationManager.add(self, predicate, v)
+										 end)
 	return values
 end
 

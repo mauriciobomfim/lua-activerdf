@@ -16,7 +16,7 @@ function test_update_value()
 	local adapter = get_write_adapter()
 
 	local eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
-	assert ( not pcall ( loadstring( "eyal.age = 18" ) ) )
+	assert ( not pcall ( loadstring "eyal.age = 18" ) )
 
 	eyal.ar.age = 100
 	assert ( 100 == eyal.ar.age )
