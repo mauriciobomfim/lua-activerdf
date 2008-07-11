@@ -1,16 +1,34 @@
-== Welcome to rdflite
+Lua RDFLite adapter
 
-rdflite is a small RDF datastore, based on sqlite3. It can be used as a 
-datastore for ActiveRDF: it acts as a gemplugin for ActiveRDF. rdflite does not 
-scale well for large datasets, but is very fast for small ones. It supports the 
-full ActiveRDF query grammar (basically, select/distinct/count with arbitrary 
-joins in the where clauses) and offers full-text search over the literals if 
-ferret is installed. 
+Lua RDFLite is a small RDF datastore, based on sqlite3. Its a Lua version of rdflite for ruby. 
+It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
+Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
+It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
+arbitrary joins in the where clauses). Unlike ruby rdflite Lua RDFLite does not offers 
+full-text search over the literals yet. 
 
-See http://www.activerdf.org/ for more information.
+Lua RDFLite adapter is distributed as a Lua module.
 
-== License
-rdflite is distributed under the LGPL license.
+Lua RDFLite SPARQL adapter is free software and uses the same license as Lua 5.1.
 
-== Authors
-* Eyal Oren
+Current version is 0.1. It was developed for Lua 5.1.
+
+Download
+
+Lua ActiveRDF SPARQL adapter source can be downloaded from its Lua Forge page:
+http://luaforge.net/frs/?group_id=370
+
+Dependencies
+
+Lua RDFLite adapter depends on four modules:
+	* Lua ActiveRDF 0.1	
+	* LuaSQL 2.1.0 (sqlite3 driver)
+	* uri 1.0 (http://luaforge.net/projects/uri)
+	* LPeg 0.8 (re module)
+
+History
+
+Version 0.1 [11/Jul/2008]
+
+Authors
+	* Mauricio Henrique de Souza Bomfim

@@ -432,8 +432,7 @@ function Resource:__index(method, ...)
 end
 
 -- manages invocations such as eyal.age
-function Resource:__newindex(method, ...)	
-	print('entrei', method)			
+function Resource:__newindex(method, ...)				
 	if type(method) == 'string' then		
 		if Resource[method] then						
 			return Resource[method]
