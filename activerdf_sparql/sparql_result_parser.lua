@@ -1,4 +1,6 @@
-local oo = require 'loop.simple'
+require 'activerdf'
+
+local oo = activerdf.oo
 
 module "activerdf_sparql.SparqlAdapter"
 

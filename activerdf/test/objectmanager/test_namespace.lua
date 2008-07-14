@@ -2,7 +2,7 @@ require 'activerdf'
 require 'activerdf.objectmanager.namespace'
 require 'activerdf.test.common'
 
-local oo = require 'loop.simple'
+local oo = activerdf.oo
 local RDFS = activerdf.RDFS
 local RDF = activerdf.RDF
 local Namespace = activerdf.Namespace

@@ -3,7 +3,7 @@ require 'activerdf.federation.connection_pool'
 require 'activerdf.federation.activerdf_adapter'
 require 'activerdf.test.common'
 
-local oo = require 'loop.simple'
+local oo = activerdf.oo
 local ConnectionPool = activerdf.ConnectionPool
 local ActiveRdfAdapter = activerdf.ActiveRdfAdapter
 local table = activerdf.table
