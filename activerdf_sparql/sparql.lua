@@ -241,9 +241,9 @@ function SparqlAdapter:parse_xml(s)
 	end
 	
 	local vars = {}
-	table.foreachi(parsed_object[1][1], function(i,v) table.insert (vars, v.args.name) end)
+	table.foreachi(parsed_object[1][1], function(i,v) if v.args then table.insert (vars, v.args.name) end end)
 	local objects = {}
-	table.foreachi(parsed_object[1][2], function(i,v) table.insert(objects, { [v[1].args.name] = { type = v[1][1].label , value = v[1][1][1] } } ) end)
+	table.foreachi(parsed_object[1][2], function(i,v) if v.args then table.insert(objects, { [v[1].args.name] = { type = v[1][1].label , value = v[1][1][1] } } ) end end)
 		
 	return self:parse_table_results(vars, objects)
 end

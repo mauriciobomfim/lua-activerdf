@@ -21,7 +21,7 @@ SuggestingAdapter = oo.class({}, FetchingAdapter)
 
 ConnectionPool.register_adapter( 'suggesting', SuggestingAdapter )
 
-local _old_initialize = FetchingAdapter.__init
+local _old_initialize = FetchingAdapter
 
 -- initialises the adapter, see RDFLite for description of possible parameters.
 function SuggestingAdapter:__init(params)
