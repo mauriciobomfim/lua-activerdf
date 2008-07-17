@@ -5,7 +5,7 @@
 --
 -- @class module
 -- @name ConnectionPool
--- $ svn propset svn:keywords Id "filename"
+-- @release $Id$
 ---------------------------------------------------------------------
 
 local table = activerdf.table
