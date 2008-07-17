@@ -1,3 +1,13 @@
+---------------------------------------------------------------------
+--- Maintains pool of adapter instances that are connected to datasources. 
+--- Returns right adapter for a given datasource, by either reusing an
+--- existing adapter-instance or creating new a adapter-instance.
+--
+-- @class module
+-- @name ConnectionPool
+-- $ svn propset svn:keywords Id "filename"
+---------------------------------------------------------------------
+
 local table = activerdf.table
 local error = error
 
