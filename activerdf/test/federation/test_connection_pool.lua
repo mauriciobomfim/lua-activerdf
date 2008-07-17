@@ -1,6 +1,4 @@
 require 'activerdf'
-require 'activerdf.federation.connection_pool'
-require 'activerdf.federation.activerdf_adapter'
 require 'activerdf.test.common'
 
 local oo = activerdf.oo

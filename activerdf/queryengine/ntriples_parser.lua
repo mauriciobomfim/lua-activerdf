@@ -1,7 +1,3 @@
--- Author:: Eyal Oren
--- Copyright:: (c) 2005-2006 Eyal Oren
--- License:: LGPL
-
 local UUID = require 'uuid'
 local re = require 're'
 local table = table
@@ -14,7 +10,6 @@ local _bnode = re.compile ( [[ { '_:' nonspace* } ]] , { nonspace = nonspace } )
 local _resource = re.compile ( [[ {'<'[^>]*'>'} ]] )
 
 -- constants for extracting resources/literals from sql results
---MatchNode = Regexp.union(/"(?:\\"|[^"])*"(?:\^\^\S+)?/,/_:\S*/,/<[^>]*>/)
 local MatchNode = re.compile ([[ l / bn / r ]], { l = _literal, bn = _bnode , r = _resource })
 local MatchBNode = re.compile ( [[ '_:' { nonspace* } ]] , { nonspace = nonspace } )
 local MatchResource = re.compile ( [[ '<' { [^>]* } '>' ]] )
@@ -23,7 +18,7 @@ local MatchLiteral = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ('^^<' { (!'>' n
 module "activerdf"
 
 -- ntriples parser
-NTriplesParser = oo.class{}
+NTriplesParser = {}
 			
 function NTriplesParser.parse_node(input)
 	local capture
@@ -134,6 +129,6 @@ end
 -- fixes unicode characters in literals (because we parse them wrongly somehow)
 function NTriplesParser.fix_unicode(str)
 	--tmp = str.gsub(/\\\u([0-9a-fA-F]{4,4})/u){ "U+#$1" }
-   --tmp.gsub(/U\+([0-9a-fA-F]{4,4})/u){["#$1".hex ].pack('U*')}
+    --tmp.gsub(/U\+([0-9a-fA-F]{4,4})/u){["#$1".hex ].pack('U*')}
 	return str
 end

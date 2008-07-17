@@ -1,5 +1,4 @@
 require 'activerdf'
-require 'activerdf.queryengine.query2sparql'
 require 'activerdf.test.common'
 
 local Query = activerdf.Query
@@ -11,7 +10,7 @@ local Query2SPARQL = activerdf.Query2SPARQL
 function test_sparql_generation()
     -- TODO: write tests for distinct, ask
 
-    local query = Query()
+    local query = Query.new()
     query:select('?s')
     query:where('?s', RDFS.Resource('predicate'), 30)
 
@@ -20,7 +19,7 @@ function test_sparql_generation()
     
     assert ( expected == generated )
 
-    query = Query()
+    query = Query.new()
     query:select('?s')
     query:where('?s', RDFS.Resource('foaf:age'), '?a')
     query:where('?a', RDFS.Resource('rdf:type'), RDFS.Resource('xsd:int'))
@@ -30,7 +29,7 @@ function test_sparql_generation()
 end
 
 function test_sparql_distinct()
-    local query = Query()
+    local query = Query.new()
     query:distinct('?s')
     query:where('?s', RDFS.Resource('foaf:age'), '?a')
     local generated = Query2SPARQL.translate(query)
@@ -40,8 +39,8 @@ end
 
 function test_query_omnipotent()
     -- can define multiple select clauses at once or separately
-    local q1 = Query():select('?s','?a')
-    local q2 = Query():select('?s'):select('?a')
+    local q1 = Query.new():select('?s','?a')
+    local q2 = Query.new():select('?s'):select('?a')
     assert ( Query2SPARQL.translate(q1), Query2SPARQL.translate(q2) )
 end
 

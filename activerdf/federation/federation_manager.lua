@@ -5,7 +5,7 @@ module "activerdf"
 
 -- Manages the federation of datasources: distributes queries to right 
 -- datasources and merges their results
-FederationManager = oo.class{}
+FederationManager = {}
 
 -- add triple s,p,o to the currently selected write-adapter
 function FederationManager.add(s,p,o)

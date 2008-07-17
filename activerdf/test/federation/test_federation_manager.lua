@@ -1,5 +1,4 @@
 require 'activerdf'
-require 'activerdf.federation.federation_manager'
 require 'activerdf.test.common'
 
 local ConnectionPool = activerdf.ConnectionPool

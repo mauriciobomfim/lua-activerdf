@@ -15,7 +15,7 @@ function test_update_value()
 	Namespace.register('ar', 'http://activerdf.org/test/')
 	local adapter = get_write_adapter()
 
-	local eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
+	local eyal = RDFS.Resource.new( 'http://activerdf.org/test/eyal' )
 	assert ( not pcall ( loadstring "eyal.age = 18" ) )
 
 	eyal.ar.age = 100

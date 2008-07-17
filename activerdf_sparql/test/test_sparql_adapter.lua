@@ -2,7 +2,6 @@ require 'activerdf'
 require 'activerdf.federation.federation_manager'
 require 'activerdf.queryengine.query'
 
-
 local ConnectionPool = activerdf.ConnectionPool
 local SparqlAdapter = activerdf_sparql.SparqlAdapter
 local RDFS = activerdf.RDFS

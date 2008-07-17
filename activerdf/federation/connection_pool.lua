@@ -4,7 +4,7 @@ local error = error
 module "activerdf"
 
 -- model with no inheritance
-ConnectionPool = oo.class{}
+ConnectionPool = {}
 
 -- currently active write-adapter (we can only write to one at a time)
 ConnectionPool.write_adapter = nil

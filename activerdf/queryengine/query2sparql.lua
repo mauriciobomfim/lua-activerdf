@@ -5,7 +5,7 @@ module "activerdf"
 
 -- Translates abstract query into SPARQL that can be executed on SPARQL-compliant
 -- data source.
-Query2SPARQL = oo.class{}
+Query2SPARQL = {}
 
 Query2SPARQL.Engines_With_Keyword = {'yars2', 'virtuoso'}
 

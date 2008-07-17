@@ -1,6 +1,6 @@
 require 'activerdf.objectmanager.namespace'
 
-local string = require 'activerdf.string'
+local string = activerdf.string
 local md5 = require 'md5'
 local error = error
 local type = type
@@ -33,6 +33,10 @@ RDFS.Resource = Resource
 -- the uri of the rdf resource being represented by this class
 -- Resource.class_uri = ''    
 -- creates new resource representing an RDF resource
+function Resource.new(...)
+	return Resource(...)
+end
+
 function Resource:__init(uri)
   local _uri  
   -- allow Resource.new(other_resource)

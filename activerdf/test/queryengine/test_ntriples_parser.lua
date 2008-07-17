@@ -1,5 +1,4 @@
 require 'activerdf'
-require 'activerdf.queryengine.ntriples_parser'
 require 'activerdf.test.common'
 
 local NTriplesParser = activerdf.NTriplesParser

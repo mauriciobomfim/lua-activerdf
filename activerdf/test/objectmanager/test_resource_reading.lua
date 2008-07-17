@@ -1,12 +1,11 @@
 require 'activerdf'
-require 'activerdf.federation.connection_pool'
-require "activerdf.test.common"
+require 'activerdf.test.common'
 
 local ConnectionPool = activerdf.ConnectionPool
 local Namespace = activerdf.Namespace
 local RDFS = activerdf.RDFS
 local adapter
-local yeal
+local eyal
 local table = activerdf.table
 local oo = activerdf.oo
 
@@ -24,7 +23,7 @@ function setup()
 	adapter = get_adapter()
 	adapter:load ( TEST_PATH .. "test_person_data.nt" )
 	Namespace.register('test', 'http://activerdf.org/test/')	
-	eyal = RDFS.Resource ( 'http://activerdf.org/test/eyal' )
+	eyal = RDFS.Resource.new( 'http://activerdf.org/test/eyal' )
 end
 
 function teardown()
@@ -131,8 +130,8 @@ function test_finders_with_options()
 	adapter:load ( file_one )
 	adapter:load ( file_two )
 
-	local one = RDFS.Resource("file:"..file_one)
-	local two = RDFS.Resource("file:"..file_two)
+	local one = RDFS.Resource.new("file:"..file_one)
+	local two = RDFS.Resource.new("file:"..file_two)
 
 	assert ( 2 == table.getn ( RDFS.Resource:find() ) )
 	assert ( 2 == table.getn ( RDFS.Resource:find( '?all' ) ) )

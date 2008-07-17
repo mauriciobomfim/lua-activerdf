@@ -8,10 +8,7 @@ local activerdf = activerdf
 module "activerdf"
 
 -- Manages namespace abbreviations and expansions
-Namespace = oo.class{
-  
-}
-
+Namespace = {}
 Namespace.namespaces = {}
 Namespace.inverted_namespaces = {}
 

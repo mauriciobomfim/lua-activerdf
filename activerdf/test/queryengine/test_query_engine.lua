@@ -1,6 +1,4 @@
 require 'activerdf'
-require 'activerdf.queryengine.query'
-require 'activerdf.queryengine.query2sparql'
 require 'activerdf.test.common'
 
 local RDFS = activerdf.RDFS
@@ -12,7 +10,7 @@ function test_sparql_generation()
 
     -- TODO: write tests for distinct, ask
 
-	local query = Query()
+	local query = Query.new()
     query:select('?s')
     query:where('?s', RDFS.Resource('predicate'), 30)
 
@@ -20,7 +18,7 @@ function test_sparql_generation()
     local expected = "SELECT ?s WHERE { ?s <predicate> \"30\"^^<http://www.w3.org/2001/XMLSchema#integer> . } "
     assert ( expected == generated )
 
-    query = Query()
+    query = Query.new()
     query:select('?s')
     query:where('?s', RDFS.Resource('foaf:age'), '?a')
     query:where('?a', RDFS.Resource('rdf:type'), RDFS.Resource('xsd:int'))
@@ -38,8 +36,8 @@ end
 
 function test_query_omnipotent()
     -- can define multiple select clauses at once or separately
-    local q1 = Query():select('?s','?a')
-    local q2 = Query():select('?s'):select('?a')
+    local q1 = Query.new():select('?s','?a')
+    local q2 = Query.new():select('?s'):select('?a')
     assert ( Query2SPARQL.translate(q1) == Query2SPARQL.translate(q2) )
 end
 

@@ -1,5 +1,3 @@
-require 'activerdf.federation.federation_manager'
-
 local type = type
 local unpack = unpack
 local tostring = tostring
@@ -15,6 +13,10 @@ module "activerdf"
 -- Query.new.select(:s).where(:s,:p,:o).
 
 Query = oo.class{}
+
+function Query.new(...)
+	return Query(...)
+end
 
 function Query:__init()  
 	return oo.rawnew(self, { 

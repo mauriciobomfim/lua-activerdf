@@ -1,5 +1,3 @@
-require 'activerdf.queryengine.query'
-
 local string = activerdf.string
 local setmetatable = setmetatable 
 local getmetatable = getmetatable
@@ -12,7 +10,7 @@ module "activerdf"
 Modules = {}
 
 -- Constructs LOOP classes for RDFS classes (in the right namespace)
-ObjectManager = oo.class{}
+ObjectManager = {}
 
 ObjectManager.__flatten = function (t,f,complete)		
 	for _,v in ipairs(t) do		
