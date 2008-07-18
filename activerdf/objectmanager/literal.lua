@@ -1,3 +1,7 @@
+---------------------------------------------------------------------
+--- Represents an RDF literal, optionally datatyped.
+-- @release $Id$
+---------------------------------------------------------------------
 local tostring = tostring
 local type = type
 local tonumber = tonumber
@@ -6,14 +10,17 @@ local string = activerdf.string
 local activerdf = activerdf
 local getmetatable = getmetatable
 local setmetatable = setmetatable
+local Namespace = activerdf.Namespace
+local oo = activerdf.oo
+local module = module
+local activerdf = activerdf
 
-module "activerdf"
-
-Literal = {}
+module 'activerdf.Literal'
 
 Namespace.register ('xsd', 'http://www.w3.org/2001/XMLSchema#')
 
-function Literal.xsd_type(self)
+--- returns the resource representing the XML Schema datatype of a literal.
+function xsd_type(self)
 	local XSD = activerdf.XSD
 	if type(self) == 'string' then
 		return XSD.string
@@ -26,24 +33,27 @@ function Literal.xsd_type(self)
 	end 
 end
 
-function Literal.typed(value, _type)	
+--- converts the literal to a lua type for the datatype.
+-- @param datatype a resource representing a datatype.
+function typed(value, datatype)	
 	local XSD = activerdf.XSD
-	if _type == XSD.string then
+	if datatype == XSD.string then
 		return tostring(value)
 	--when XSD::date
 	--DateTime.parse(value)
-	elseif _type == XSD.boolean then
+	elseif datatype == XSD.boolean then
 		return value == 'true' or value == 1
-	elseif _type == XSD.integer then		
+	elseif datatype == XSD.integer then		
 		return tonumber(value)
 	end
 end
 
-function Literal.to_ntriple(self)	
+--- returns the literal on ntriple format
+function to_ntriple(self)	
 	if activerdf_without_xsdtype then
       return '"'..tostring(self)..'"'
 	else
-      return '"'..tostring(self)..'"^^'..tostring(Literal.xsd_type(self))
+      return '"'..tostring(self)..'"^^'..tostring(xsd_type(self))
 	end  
 end
 
@@ -51,12 +61,12 @@ end
 local strmt = getmetatable(oldstring)
 if strmt then	
 	if strmt.__index then
-		setmetatable(strmt.__index, { __index = Literal })
+		setmetatable(strmt.__index, { __index = _M })
 	else
-		strmt.__index = Literal
+		strmt.__index = _M
 	end
 else
-	setmetatable(oldstring, { __index = Literal })
+	setmetatable(oldstring, { __index = _M })
 end
 
 --class Integer; include Literal; end
@@ -66,10 +76,10 @@ end
 --class TrueClass; include Literal; end
 --class FalseClass; include Literal; end
 
-LocalizedString = oo.class({}, Literal)
+activerdf.LocalizedString = oo.class({}, Literal)
 
 --  attr_reader :lang
-function LocalizedString:__init(value, lang)	
+function activerdf.LocalizedString:__init(value, lang)	
 	local l = lang
 	local v = value
 	if string.sub(l, 1,1) == '@' then
@@ -82,7 +92,7 @@ function LocalizedString:__init(value, lang)
 	})
 end
 
-function LocalizedString:to_ntriple()
+function activerdf.LocalizedString:to_ntriple()
 	if self.lang then
 		return '"'..tostring(self)..'"@'..self.lang
 	else
@@ -90,14 +100,6 @@ function LocalizedString:to_ntriple()
 	end
 end
 
-function LocalizedString:to_ntriple()
-	if self.lang then
-		return '"'..tostring(self)..'"@'..self.lang
-	else
-		return self
-	end
-end
-
-function LocalizedString:__tostring()
+function activerdf.LocalizedString:__tostring()
 	return tostring(self.value)
 end

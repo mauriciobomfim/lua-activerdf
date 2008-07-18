@@ -47,6 +47,9 @@ end
 -- * results = one of 'xml', 'json', 'sparql_xml'
 -- * request_method = 'get' (default) or 'post'
 -- * timeout = timeout in seconds to wait for endpoint response
+function SparqlAdapter.new(...)
+	return SparqlAdapter(...)
+end
 
 function SparqlAdapter:__init(params)
 	params = params or {}

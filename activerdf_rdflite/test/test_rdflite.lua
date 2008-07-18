@@ -207,8 +207,8 @@ function test_person_data()
     assert ( type ( color ) == 'string' )
 
     ObjectManager.construct_classes()    
-    assert ( oo.instanceof ( eyal, activerdf.TEST.Person ) )
-    assert ( oo.instanceof ( eyal, RDFS.Resource ) )
+    assert ( eyal:instanceof ( activerdf.TEST.Person ) )
+	assert ( eyal:instanceof ( RDFS.Resource ) )
 end
 
 function test_delete_data()

@@ -1,7 +1,15 @@
+---------------------------------------------------------------------
+-- Represents an RDF resource. Manages manipulations of that resource,
+-- including data lookup (e.g. eyal.age), data updates (e.g. eyal.age=20),
+-- class-level lookup (Person:find_by_name 'eyal'), and class-membership
+-- (eyal.class ...Person).
+-- @release $Id$
+-- LUADOC COMMENTS ARE AT END OF THIS FILE
+---------------------------------------------------------------------
 require 'activerdf.objectmanager.namespace'
+require 'activerdf.queryengine.query'
 
 local string = activerdf.string
-local md5 = require 'md5'
 local error = error
 local type = type
 local unpack = unpack
@@ -9,19 +17,15 @@ local tostring = tostring
 local getmetatable = getmetatable
 local setmetatable = setmetatable
 local rawequal = rawequal
+local module = module
 
 module "activerdf"
 
 -- TODO: finish removal of ObjectManager.construct_classes: make dynamic finders 
 -- accessible on instance level, and probably more stuff.
 
-RDFS = RDFS or {
-	-- Represents an RDF resource and manages manipulations of that resource,
-	-- including data lookup (e.g. eyal.age), data updates (e.g. eyal.age=20),
-	-- class-level lookup (Person.find_by_name 'eyal'), and class-membership
-	-- (eyal.class ...Person).
-}
-  
+RDFS = RDFS or {}
+
 local Resource = oo.class{
 	-- uri of the resource (for instances of this class: rdf resources)
     uri = ''
@@ -29,12 +33,12 @@ local Resource = oo.class{
 
 RDFS.Resource = Resource
 
--- adding accessor to the class uri:
--- the uri of the rdf resource being represented by this class
--- Resource.class_uri = ''    
--- creates new resource representing an RDF resource
-function Resource.new(...)
-	return Resource(...)
+--- creates new resource representing an RDF resource.
+-- @name new
+-- @param uri an uri string or a resource
+-- @usage <code>Resource.new('http://www.example.org/resource')</code>
+function Resource.new(uri)
+	return Resource(uri)
 end
 
 function Resource:__init(uri)
@@ -81,7 +85,7 @@ function Resource:abbreviation()
 	return {tostring(Namespace.prefix(uri)), self:localname()};
 end
 
- -- a resource is same as another if they both represent the same uri
+-- a resource is same as another if they both represent the same uri
 function Resource:__eq(other)
 	local self_uri
 	local other_uri
@@ -99,15 +103,8 @@ function Resource:__eq(other)
 end
 
 --getmetatable(Resource).__eq = Resource.__eq
-
 --alias_method 'eql?','=='
--- overriding hash to use uri.hash
--- needed for array.uniq
-function Resource:hash()
-	return md5.crypt(self.uri, self.uri)
-end
 
--- overriding sort based on uri
 function Resource:to_ntriple() 
 	local uri
 	if oo.instanceof(self, RDFS.Resource) then
@@ -117,7 +114,6 @@ function Resource:to_ntriple()
 	end
 	return "<"..uri..">" 
 end
-
 
 function Resource:to_xml()
 	local base = string.chop(Namespace.expand(Namespace.prefix(self),''))	
@@ -166,16 +162,19 @@ end
 --##### class level methods	#####
 --#####                    	#####
 
--- returns the predicates that have this resource as their domain (applicable
--- predicates for this resource)
+--- returns the predicates that have this resource as their domain. 
+-- (applicable predicates for this resource).
+-- @name predicates
 function Resource.predicates()
 	local domain = Namespace.lookup('rdfs', 'domain')	
 	return Query():distinct('?p'):where('?p', domain, Resource.class_uri):execute() or {}
 end
 
--- returns array of all instances of this class (e.g. Person.find_all)
+--- returns a table of all instances of this class.
 -- (always returns collection)
-function Resource.find_all(self, ...)		
+-- @name find_all
+-- @usage <code>Person:find_all()</code>
+function Resource.find_all(self, ...)
 	return self:find('?all', ...)
 end
 
@@ -210,7 +209,11 @@ getmetatable(Resource).__index = Resource.send
 --#####                         #####
 --##### instance level methods	#####
 --#####                         #####
-function Resource:find(...)  		
+--- returns a table of all instances of this class respecting the filters params ...
+-- @name find
+-- @param ... table with filter fields where, order, reverse_order, context, limit and offset
+-- @usage <code>Person:find{ where = { name = "eyal" } }</code>
+function Resource:find(...)		
 	if oo.isclass(self) and oo.subclassof(self, Resource) then		
 		return self.class_uri:find(...)
 	end
@@ -601,7 +604,9 @@ function Resource:__newindex(method, ...)
 end
 
 
--- saves instance into datastore
+--- saves instance into datastore.
+-- @name save
+-- @usage <code>resource = Resource.new('http://www.example.com/resource') <br>resource:save()</code> 
 function Resource:save()
 	local db = ConnectionPool.write_adapter
 	local rdftype = Namespace.lookup('rdf', 'type')
@@ -614,23 +619,25 @@ function Resource:save()
 	end)
 end
 
--- returns all rdf:type of this instance, e.g. [RDFS::Resource, 
--- FOAF::Person]
+--- returns all rdf:type of this instance.
 --
 -- Note: this method performs a database lookup for { self rdf:type ?o }. For 
 -- simple type-checking (to know if you are handling an ActiveRDF object, use 
--- self.class, which does not do a database query, but simply returns 
+-- oo.classof(self), which does not do a database query, but simply returns 
 -- RDFS::Resource.
+-- @name type
+-- @return e.g. { RDFS.Resource, FOAF.Person }
+-- @usage <code>resource:type()</code>
 function Resource:type()	
 	return table.map(self:types(), function(index, _type)
 		return ObjectManager.construct_class(_type)
 	end)
 end
 	
--- define a localname for a predicate URI
---
--- localname should be a Symbol or String, fulluri a Resource or String, e.g. 
--- add_predicate(:name, FOAF::lastName)
+--- defines a localname for a predicate URI.
+-- localname should be a string, fulluri a Resource or string. 
+-- @name add_predicate
+-- @usage <code>resource:add_predicate('name', FOAF.lastName)</code>
 function Resource:add_predicate(localname, fulluri)
 	local localname = tostring(localname)
 	if type(fulluri) == 'string' then
@@ -642,20 +649,27 @@ function Resource:add_predicate(localname, fulluri)
 	return self.predicates[localname]
 end
 
--- overrides built-in instance_of? to use rdf:type definitions
-function Resource:instance_of(klass)
+--- overrides built-in instance_of to use rdf:type definitions.
+-- @name instanceof
+-- @param klass a LOOP class
+-- @usage <code>resource:instanceof(klass)</code>
+function Resource:instanceof(klass)
 	return table.include(self:type(), klass)
 end
 
--- returns all predicates that fall into the domain of the rdf:type of this
--- resource
+--- returns all predicates that fall into the domain of the rdf:type of this resource.
+-- @name class_level_predicates
+-- @usage <code>resource:class_level_predicates()</code>
 function Resource:class_level_predicates()	
 	local type = Namespace.lookup('rdf', 'type')
 	local domain = Namespace.lookup('rdfs', 'domain')		
 	return Query():distinct('?p'):where(self,type,'?t'):where('?p', domain, '?t'):execute() or {}
 end
 
--- returns all predicates that are directly defined for this resource
+--- returns all predicates that are directly defined for this resource.
+-- @name direct_predicates
+-- @param distinct true or false
+-- @usage <code>resource:direct_predicates(true)</code>
 function Resource:direct_predicates(distinct)	
 	local distinct = distinct == nil and true or distinct	
 	if distinct then
@@ -673,7 +687,10 @@ end
 -- without worrying whether paper.creator is single- or multi-valued
 -- alias include? ==
 
--- returns uri of resource, can be overridden in subclasses
+--- returns uri of resource, can be overridden in subclasses.
+-- called by lua tostring 
+-- @name __tostring
+-- @usage <code>tostring(resource)</code>
 function Resource:__tostring()
 	return "<"..self.uri..">"
 end
@@ -868,3 +885,22 @@ function DynamicFinderProxy:query(...)
     self.value = query:execute()
     return self.value
 end
+
+-- it is here just because of luadoc
+---------------------------------------------------------------------
+--- Represents an RDF resource. Manages manipulations of that resource,
+-- including data lookup (e.g. eyal.age), data updates (e.g. eyal.age=20),
+-- class-level lookup (Person:find_by_name 'eyal'), and class-membership
+-- (eyal.class ...Person).<br>
+-- <br/><b>Dynamic attribute-based finders</b><br/><br/>
+-- Dynamic attribute-based finders work by appending the name of an attribute to find_by_, 
+-- so you get finders like <code>Person:find_by_name(name)</code>, <code>Person:find_by_last_name(last_name)</code>, 
+-- <code>Payment:find_by_transaction_id(transaction_id)</code>.<br> 
+-- So instead of writing <code>Person:find( { where = { name = "eyal" } } )</code>, 
+-- you just do <code>Person:find_by_name("eyal")</code>. 
+-- It‘s also possible to use multiple attributes in the same find by separating them with "and", 
+-- so you get finders like <code>Person:find_by_user_name_and_password(user_name, password)</code> or 
+-- even <code>Payment:find_by_purchaser_and_state_and_country(purchaser, state, country)</code>.<br>
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf.RDFS.Resource'

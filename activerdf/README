@@ -37,15 +37,14 @@ http://luaforge.net/frs/?group_id=370
 
 Dependencies
 
-Lua ActiveRDF depends on four modules:	
-	* LOOP 2.2
-	* md5 1.0.2
+Lua ActiveRDF depends on three modules:	
+	* LOOP 2.2	
 	* uuid library for Lua 5.1 / Sep 2007	
 	* LPeg 0.8
 	 
 History
 
-Version 0.1 [10/Apr/2008]
+Version 0.1 [17/Jul/2008]
 
 Installing
 

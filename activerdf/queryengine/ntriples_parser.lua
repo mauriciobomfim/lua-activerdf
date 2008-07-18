@@ -2,6 +2,8 @@ local UUID = require 'uuid'
 local re = require 're'
 local table = table
 local string = string
+local RDFS = activerdf.RDFS
+local Literal = activerdf.Literal
 
 local nonspace = re.compile("[^ \t\b\r\f\v]")
 local space = re.compile("[ \t\b\r\f\v]")
@@ -14,13 +16,15 @@ local MatchNode = re.compile ([[ l / bn / r ]], { l = _literal, bn = _bnode , r 
 local MatchBNode = re.compile ( [[ '_:' { nonspace* } ]] , { nonspace = nonspace } )
 local MatchResource = re.compile ( [[ '<' { [^>]* } '>' ]] )
 local MatchLiteral = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ('^^<' { (!'>' nonspace)+ } '>')? ]] , { nonspace = nonspace } )
-																					 																				    
-module "activerdf"
 
--- ntriples parser
-NTriplesParser = {}
-			
-function NTriplesParser.parse_node(input)
+---------------------------------------------------------------------
+--- Ntriples parser
+-- @release $Id$
+---------------------------------------------------------------------																					 																				    
+module "activerdf.NTriplesParser"
+
+-- 
+function parse_node(input)
 	local capture
 	local capture2
 	local value	
@@ -30,7 +34,7 @@ function NTriplesParser.parse_node(input)
 	else
 		capture, capture2 = MatchLiteral:match(input)		
 		if capture then
-			value = NTriplesParser.fix_unicode(capture)
+			value = fix_unicode(capture)
 			if capture2 then
 				return Literal.typed(value, RDFS.Resource(capture2))
 			else
@@ -47,9 +51,10 @@ function NTriplesParser.parse_node(input)
 	end
 end
 
--- parses an input string of ntriples and returns a nested array of [s, p, o] 
--- (which are in turn ActiveRDF objects)
-function NTriplesParser.parse(input)
+--- parses an input string of ntriples and returns a nested table of { s, p, o }
+-- (which are in turn ActiveRDF objects).
+-- @param input string of ntriples
+function parse(input)
 	-- need unique identifier for this batch of triples (to detect occurence of 
 	-- same bnodes _:#1
 	local uuid = UUID.new()
@@ -104,7 +109,7 @@ function NTriplesParser.parse(input)
 		else
 			capture, capture2 = MatchLiteral:match(nodes[3])			
 			if capture then
-				value = NTriplesParser.fix_unicode(capture)
+				value = fix_unicode(capture)
             if capture2 then
 					object = Literal.typed(value, RDFS.Resource(capture2))
             else
@@ -126,8 +131,8 @@ end
 
 	
 
--- fixes unicode characters in literals (because we parse them wrongly somehow)
-function NTriplesParser.fix_unicode(str)
+--- fixes unicode characters in literals (because we parse them wrongly somehow).
+function fix_unicode(str)
 	--tmp = str.gsub(/\\\u([0-9a-fA-F]{4,4})/u){ "U+#$1" }
     --tmp.gsub(/U\+([0-9a-fA-F]{4,4})/u){["#$1".hex ].pack('U*')}
 	return str

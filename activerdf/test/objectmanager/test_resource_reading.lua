@@ -75,8 +75,8 @@ function test_eyal_age()
 end
 
 function test_eyal_type()
-	assert ( oo.instanceof ( eyal, RDFS.Resource ) )
-	assert ( oo.instanceof ( eyal, activerdf.TEST.Person ) )
+	assert ( eyal:instanceof ( RDFS.Resource ) )
+	assert ( eyal:instanceof ( activerdf.TEST.Person ) )
 end
 
 function test_find_options()

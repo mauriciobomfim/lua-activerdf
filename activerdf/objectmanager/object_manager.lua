@@ -4,19 +4,27 @@ local getmetatable = getmetatable
 local ipairs = ipairs
 local type = type
 local tostring = tostring
+local oo = activerdf.oo
+local table = activerdf.table
+local activerdf = activerdf
 
-module "activerdf"
+local Namespace = activerdf.Namespace
+local RDFS = activerdf.RDFS
 
-Modules = {}
+activerdf.Modules = {}
+local Modules = activerdf.Modules 
 
--- Constructs LOOP classes for RDFS classes (in the right namespace)
-ObjectManager = {}
+---------------------------------------------------------------------
+--- Constructs LOOP classes for RDFS classes (in the right namespace).
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf.ObjectManager'
 
-ObjectManager.__flatten = function (t,f,complete)		
+__flatten = function (t,f,complete)		
 	for _,v in ipairs(t) do		
 		if type(v) == "table" and not oo.instanceof(v, RDFS.Resource) then		
 			 if (complete or type(v[1]) == "table") then
-				  ObjectManager.__flatten(v,f,complete)				  				  
+				  __flatten(v,f,complete)				  				  
 			 else
 				  f[#f+1] = v		  
 			 end
@@ -26,18 +34,17 @@ ObjectManager.__flatten = function (t,f,complete)
 	end
 end
 
-ObjectManager.flatten = function(t,f,complete)
+flatten = function(t,f,complete)
   local f = { }   
-  ObjectManager.__flatten(t,f,true)    
+  __flatten(t,f,true)    
   return f
 end
 
--- Constructs empty LOOP classes for all RDF types found in the data. Allows 
--- users to invoke methods on classes (e.g. FOAF.Person) without
--- getting symbol undefined errors (because e.g. foaf:person wasnt encountered
--- before so no class was created for it)
-
-function ObjectManager.construct_classes()
+--- Constructs empty LOOP classes for all RDF types found in the data. 
+-- Allows users to invoke methods on classes (e.g. FOAF.Person) without
+-- getting symbol undefined errors (because e.g. foaf.person wasnt encountered
+-- before so no class was created for it).
+function construct_classes()
 	-- find all rdf:types and construct class for each of them
 	-- q = Query.new.select(:t).where(:s,Namespace.lookup(:rdf,:type),:t)
 	-- find everything defined as rdfs:class or owl:class
@@ -51,23 +58,23 @@ function ObjectManager.construct_classes()
 
 	local klasses = {}
  
-	table.insert(klasses, Query():distinct('?s'):where('?s',_type, rdfsklass):execute())
-	table.insert(klasses, Query():distinct('?s'):where('?s',_type, owlklass):execute())
+	table.insert(klasses, activerdf.Query():distinct('?s'):where('?s',_type, rdfsklass):execute())
+	table.insert(klasses, activerdf.Query():distinct('?s'):where('?s',_type, owlklass):execute())
 	
 	-- flattening to get rid of nested arrays
 	-- compacting array to get rid of nil (if one of these queries returned nil)		
-	local klasses = ObjectManager.flatten(klasses)	
+	local klasses = flatten(klasses)	
 	-- $activerdflog.debug "ObjectManager: construct_classes: classes found: #{klasses}"
 	
 	-- then we construct a LOOP class for each found rdfs:class
 	-- and return the set of all constructed classes			
 	
-	return table.map(klasses, function(i,t) return ObjectManager.construct_class(t) end)
+	return table.map(klasses, function(i,t) return construct_class(t) end)
 end
 
--- constructs LOOP class for the given resource (and puts it into the module as
--- defined by the registered namespace abbreviations)
-function ObjectManager.construct_class(resource)	
+--- constructs a LOOP class for the given resource. (and puts it into the module as
+-- defined by the registered namespace abbreviations).
+function construct_class(resource)	
 	-- get prefix abbreviation and localname from type
    -- e.g. :foaf and Person
    local localname = Namespace.localname(resource)
@@ -77,14 +84,14 @@ function ObjectManager.construct_class(resource)
    -- e.g. FOAF and Person
    if not prefix then
 		-- if the prefix is unknown, we create our own from the full URI
-		modulename = ObjectManager.create_module_name(resource)
+		modulename = create_module_name(resource)
 		-- $activerdflog.debug "ObjectManager: construct_class: constructing modulename #{modulename} from URI #{resource}"
 	else
 		-- otherwise we convert the registered prefix into a module name
-		modulename = ObjectManager.prefix_to_module(prefix)
+		modulename = prefix_to_module(prefix)
 		--$activerdflog.debug "ObjectManager: construct_class: constructing modulename #{modulename} from registered prefix #{prefix}"
    end
-   local klassname = ObjectManager.localname_to_class(localname)
+   local klassname = localname_to_class(localname)
 
    -- look whether module defined
    -- else: create it
@@ -119,18 +126,18 @@ function ObjectManager.construct_class(resource)
 end
 
 
-function ObjectManager.prefix_to_module(prefix)
+function prefix_to_module(prefix)
 	-- TODO: remove illegal characters
 	return string.upper(prefix)
 end
 
-function ObjectManager.localname_to_class(localname)
+function localname_to_class(localname)
 	-- replace illegal characters inside the uri
 	-- and capitalize the classname	
-	return string.capitalize(ObjectManager.replace_illegal_chars(localname))
+	return string.capitalize(replace_illegal_chars(localname))
 end
 
-function ObjectManager.create_module_name(resource)
+function create_module_name(resource)
 	-- TODO: write unit test to verify replacement of all illegal characters
 
 	-- extract non-local part (including delimiter)
@@ -142,10 +149,10 @@ function ObjectManager.create_module_name(resource)
 	-- slash)
 	local cleaned_non_local = nonlocal:gsub("[^%w]+$","")
 	-- replace illegal chars within the uri
-	return ObjectManager.replace_illegal_chars(cleaned_non_local):upper()
+	return replace_illegal_chars(cleaned_non_local):upper()
 end
 
-function ObjectManager.replace_illegal_chars(name)
+function replace_illegal_chars(name)
 	return name:gsub("[^%w]+","_")
 end
 

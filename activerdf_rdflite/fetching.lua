@@ -6,6 +6,7 @@ local string = activerdf.string
 local execute = os.execute
 local RDFS = activerdf.RDFS
 local oo = activerdf.oo
+
 module "activerdf_rdflite"
 
 FetchingAdapter = oo.class({}, RDFLite)
@@ -19,6 +20,10 @@ ConnectionPool.register_adapter('fetching', FetchingAdapter)
 --function FetchingAdapter:__init(params)	
 --	return RDFLite:__init(params)
 --end
+
+function FetchingAdapter.new(...)
+	return FetchingAdapter(...)
+end
 
 function FetchingAdapter:fetch ( url )
     -- check if url starts with http://

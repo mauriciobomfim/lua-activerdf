@@ -97,6 +97,9 @@ ConnectionPool.register_adapter('rdflite', RDFLite)
 -- * :location => filepath (defaults to memory)
 -- * :keyword => true/false (defaults to false)
 -- * :pidx, :oidx, etc. => true/false (enable/disable these indices)
+function RDFLite.new(...)
+	return RDFLite(...)
+end
 
 function RDFLite:__init(params)
 	local params = params or {}

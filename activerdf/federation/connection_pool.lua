@@ -1,75 +1,79 @@
 ---------------------------------------------------------------------
 --- Maintains pool of adapter instances that are connected to datasources. 
---- Returns right adapter for a given datasource, by either reusing an
---- existing adapter-instance or creating new a adapter-instance.
+-- Returns right adapter for a given datasource, by either reusing an
+-- existing adapter-instance or creating new a adapter-instance.
 --
--- @class module
--- @name ConnectionPool
 -- @release $Id$
 ---------------------------------------------------------------------
-
 local table = activerdf.table
 local error = error
 
-module "activerdf"
+module 'activerdf.ConnectionPool'
 
 -- model with no inheritance
-ConnectionPool = {}
+-- ConnectionPool = {}
 
 -- currently active write-adapter (we can only write to one at a time)
-ConnectionPool.write_adapter = nil
+write_adapter = nil
 
 -- default setting for auto_flush
-ConnectionPool.auto_flush = true
+auto_flush = true
 
 -- pool of all adapters
-ConnectionPool.adapter_pool = {}
+adapter_pool = {}
 
---pool of connection parameters to all adapter
-ConnectionPool.adapter_parameters = {}
+-- pool of connection parameters to all adapter
+adapter_parameters = {}
 
 -- adapters-classes known to the pool, registered by the adapter-class
 -- itself using register_adapter method, used to select new
 -- adapter-instance for requested connection type
-ConnectionPool.registered_adapter_types = {}
+registered_adapter_types = {}
 
--- clears the pool: removes all registered data sources
-function ConnectionPool.clear()
+--- clears the pool: removes all registered data sources
+function clear()
 	--$activerdflog.info "ConnectionPool: clear called"
-	ConnectionPool.adapter_pool = {}
-	ConnectionPool.adapter_parameters = {}
-	ConnectionPool.write_adapter = nil
+	adapter_pool = {}
+	adapter_parameters = {}
+	write_adapter = nil
 end
 
-function ConnectionPool.adapters()
-	return table.dup(ConnectionPool.adapter_pool)
+--- returns the set of currently registered datasources
+function adapters()
+	return table.dup(adapter_pool)
 end
 
--- flushes all openstanding changes into the original datasource.
-function ConnectionPool.flush()
-	return ConnectionPool.write_adapter:flush()
+--- flushes all openstanding changes into the original datasource.
+function flush()
+	return write_adapter:flush()
 end
 
-function ConnectionPool.adapter_types()
-	return table.keys(ConnectionPool.registered_adapter_types)
+--- returns the set of currently registered datasources types
+function adapter_types()
+	return table.keys(registered_adapter_types)
 end
 
--- returns the set of currently registered read-access datasources
-function ConnectionPool.read_adapters()
-	return table.select(ConnectionPool.adapter_pool, function(index, adapter) return adapter.reads end)
+--- returns the set of currently registered read-access datasources
+function read_adapters()
+	return table.select(adapter_pool, function(index, adapter) return adapter.reads end)
 end
 
-function ConnectionPool.write_adapters()
-	return table.select(ConnectionPool.adapter_pool, function(index, adapter) return adapter.writes end)
+--- returns the set of currently registered write-access datasources
+function write_adapters()
+	return table.select(adapter_pool, function(index, adapter) return adapter.writes end)
 end
 
--- returns adapter-instance for given parameters (either existing or new)
-function ConnectionPool.add_data_source(connection_params)
+--- returns adapter-instance for given parameters (either existing or new)
+-- @param connection_params a table with at least the field type for the type of datasource. Others fields depends on datasource. 
+-- @usage for sparql: <code>ConnectionPool.add_data_source{ type = 'sparql', url = 'http://www.example.org/sparql' }</code>
+-- @usage for rdflite: <code>ConnectionPool.add_data_source{ type = 'rdflite', url = '/path/to/database.db' }</code>
+-- @return adapter-instance for given parameters 
+function add_data_source(connection_params)
     --$activerdflog.info "ConnectionPool: add_data_source with params: #{connection_params.inspect}"	
 	
     --either get the adapter-instance from the pool
     --or create new one (and add it to the pool)
-   local index = table.index(ConnectionPool.adapter_parameters, connection_params)			
+   	local index = table.index(adapter_parameters, connection_params)			
 	local adapter
 	
 	if index == nil then
@@ -77,71 +81,75 @@ function ConnectionPool.add_data_source(connection_params)
 		-- register its connection parameters in parameters-array
 		-- and add it to the pool (at same index-position as parameters)
 		-- $activerdflog.debug("Create a new adapter for parameters #{connection_params.inspect}")
-		adapter = ConnectionPool.create_adapter(connection_params)
-		table.insert(ConnectionPool.adapter_parameters, connection_params)
-		table.insert(ConnectionPool.adapter_pool, adapter)	  
+		adapter = create_adapter(connection_params)
+		table.insert(adapter_parameters, connection_params)
+		table.insert(adapter_pool, adapter)	  
 	else
 		-- if adapter parametrs registered already,
 		-- then adapter must be in the pool, at the same index-position as its parameters
 		-- $activerdflog.debug("Reusing existing adapter")
-		adapter = ConnectionPool.adapter_pool[index]
+		adapter = adapter_pool[index]
 	end	
 		-- sets the adapter as current write-source if it can write		
 	if adapter.writes then
-		ConnectionPool.write_adapter = adapter
+		write_adapter = adapter
 	end	
 	return adapter
 end
   
--- remove one adapter from activerdf
-function ConnectionPool.remove_data_source(adapter)
+--- remove one adapter from activerdf
+-- @param adapter an instance of a datasource to be removed
+function remove_data_source(adapter)
 	--$activerdflog.info "ConnectionPool: remove_data_source with params: #{adapter.to_s}"
     
-	local index = table.index(ConnectionPool.adapter_pool, adapter)
+	local index = table.index(adapter_pool, adapter)
 
 	-- remove_data_source mit be called repeatedly, e.g because the adapter object is stale
 	if index then
-      ConnectionPool.adapter_parameters[index] = nil
-		ConnectionPool.adapter_pool[index] = nil
-      if table.emtpy(ConnectionPool.write_adapters) then
-			ConnectionPool.write_adapter = nil
+      adapter_parameters[index] = nil
+		adapter_pool[index] = nil
+      if table.emtpy(write_adapters) then
+			write_adapter = nil
       else
-			ConnectionPool.write_adapter = ConnectionPool.write_adapters[1]
+			write_adapter = write_adapters[1]
       end
     end
 end
 
--- sets adapter-instance for connection parameters (if you want to re-enable an existing adapter)
-function ConnectionPool.set_data_source(adapter, connection_params)
+--- sets adapter-instance for connection parameters (if you want to re-enable an existing adapter)
+-- @param adapter an adapter-instance
+-- @param connection_params new connection parameters for adapter
+-- @return the same adapter
+function set_data_source(adapter, connection_params)
 	local connection_params = connection_params or {}
-	local index = table.index(ConnectionPool.adapter_parameters, connection_params)
+	local index = table.index(adapter_parameters, connection_params)
 	if index == nil then
-		table.insert(ConnectionPool.adapter_parameters, connection_params)
-		table.insert(ConnectionPool.adapter_pool, adapter)
+		table.insert(adapter_parameters, connection_params)
+		table.insert(adapter_pool, adapter)
 	else
-		ConnectionPool.adapter_pool[index] = adapter
+		adapter_pool[index] = adapter
 	end
 	if adapter.writes then
-		ConnectionPool.write_adapter = adapter
+		write_adapter = adapter
 	end
 	return adapter
 end
 
--- aliasing add_data_source as add
--- (code bit more complicad since they are class methods)
-ConnectionPool.add = ConnectionPool.add_data_source
+--- aliasing add_data_source as add
+add = add_data_source
 
--- adapter-types can register themselves with connection pool by
--- indicating which adapter-type they are
-function ConnectionPool.register_adapter(_type, klass)	
+--- adapter-types can register themselves with connection pool by indicating which adapter-type they are
+-- @param type a string for adapter type e.g 'rdflite'
+-- @param klass a class for an adapter 
+function register_adapter(type, klass)	
 	-- $activerdflog.info "ConnectionPool: registering adapter of type #{type} for class #{klass}"
-	ConnectionPool.registered_adapter_types[_type] = klass
+	registered_adapter_types[type] = klass
 end
 
 -- create new adapter from connection parameters
-function ConnectionPool.create_adapter(connection_params)
+function create_adapter(connection_params)
 	-- lookup registered adapter klass
-	local klass = ConnectionPool.registered_adapter_types[connection_params['type']]	
+	local klass = registered_adapter_types[connection_params['type']]	
 	-- raise error if adapter type unknown
 	if klass == nil then
 		error("unknown adapter type "..connection_params['type'])

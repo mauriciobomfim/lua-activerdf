@@ -1,5 +1,5 @@
 require 'activerdf'
-require 'activerdf.objectmanager.namespace'
+--require 'activerdf.objectmanager.namespace'
 require 'activerdf.test.common'
 
 local oo = activerdf.oo

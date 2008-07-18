@@ -1,14 +1,24 @@
+require 'activerdf.federation.connection_pool'
+require 'activerdf.objectmanager.object_manager'
+
 local type = type
 local error = error
+local table = activerdf.table
+local ConnectionPool = activerdf.ConnectionPool
+local ObjectManager = activerdf.ObjectManager
 
-module "activerdf"
+---------------------------------------------------------------------
+--- Manages the federation of datasources: distributes queries to 
+-- right datasources and merges their results.
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf.FederationManager'
 
--- Manages the federation of datasources: distributes queries to right 
--- datasources and merges their results
-FederationManager = {}
-
--- add triple s,p,o to the currently selected write-adapter
-function FederationManager.add(s,p,o)
+--- add triple s,p,o to the currently selected write-adapter.
+-- @param s subject
+-- @param p predicate
+-- @param o object
+function add(s,p,o)
 	-- TODO: allow addition of full graphs	
 	if not ConnectionPool.write_adapter then 
 		error("cannot write without a write-adapter")
@@ -16,9 +26,12 @@ function FederationManager.add(s,p,o)
 	return ConnectionPool.write_adapter:add(s,p,o)
 end
 
--- delete triple s,p,o from the currently selected write adapter (s and p are 
--- mandatory, o is optional, symbols are interpreted as wildcards)
-function FederationManager.delete(s,p,o)
+--- delete triple s,p,o from the currently selected write adapter.
+-- (s and p are mandatory, o is optional, symbols are interpreted as wildcards).
+-- @param s subject
+-- @param p predicate
+-- @param o object
+function delete(s,p,o)
 	local o = o or '?all'
 	if not ConnectionPool.write_adapter then		
 		error("cannot write without a write-adapter")
@@ -26,10 +39,13 @@ function FederationManager.delete(s,p,o)
 	return ConnectionPool.write_adapter:delete(s,p,o)
 end
 
--- executes read-only queries
--- by distributing query over complete read-pool
--- and aggregating the results
-function FederationManager.query(q, options, block)	
+--- executes read-only queries by distributing query over 
+-- complete read-pool and aggregating the results.
+-- @param q query (instance of Query class)
+-- @param options e.g <code>{ flatten = true }</code>
+-- @param block function for traverse query results
+-- @return a table containing the query results
+function query(q, options, block)	
 	local options = options or { flatten = true }	
 	-- build Array of results from all sources
 	-- TODO: write test for sebastian's select problem
@@ -84,4 +100,3 @@ function FederationManager.query(q, options, block)
 	end	
 	return results
 end
-

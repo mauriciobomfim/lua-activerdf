@@ -24,6 +24,10 @@ ConnectionPool.register_adapter( 'suggesting', SuggestingAdapter )
 local _old_initialize = FetchingAdapter
 
 -- initialises the adapter, see RDFLite for description of possible parameters.
+function SuggestingAdapter.new(...)
+	return SuggestingAdapter(...)
+end
+
 function SuggestingAdapter:__init(params)
 	obj = _old_initialize(params)
 	obj.db:execute('drop view if exists occurrence')

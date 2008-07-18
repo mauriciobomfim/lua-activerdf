@@ -1,3 +1,5 @@
+require 'activerdf.federation.federation_manager'
+
 local type = type
 local unpack = unpack
 local tostring = tostring

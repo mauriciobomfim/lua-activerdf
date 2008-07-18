@@ -8,10 +8,9 @@ require 'activerdf.table'
 require 'activerdf.string'
 require 'activerdf.objectmanager.resource'
 require 'activerdf.objectmanager.bnode'
-require 'activerdf.objectmanager.object_manager'
 require 'activerdf.objectmanager.literal'
-require 'activerdf.federation.connection_pool'
 require 'activerdf.federation.activerdf_adapter'
+
 
 local load_adapter = function(s)
   require(s)

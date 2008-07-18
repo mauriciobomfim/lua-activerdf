@@ -1,20 +1,23 @@
+---------------------------------------------------------------------
+--- Manages namespace abbreviations and expansions.
+-- @release $Id$
+---------------------------------------------------------------------
 local setmetatable = setmetatable
 local string = string
 local tostring = tostring
 local type = type
 local error = error
+local table = activerdf.table
 local activerdf = activerdf
 
-module "activerdf"
+module 'activerdf.Namespace'
 
--- Manages namespace abbreviations and expansions
-Namespace = {}
-Namespace.namespaces = {}
-Namespace.inverted_namespaces = {}
+namespaces = {}
+inverted_namespaces = {}
 
--- registers a namespace prefix and its associated expansion (full URI)
--- e.g. :rdf and 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
-function Namespace.register(prefix, fullURI)
+--- registers a namespace prefix and its associated expansion (full URI).
+-- e.g. 'rdf' and 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'.
+function register(prefix, fullURI)
 	if ( tostring(prefix) == "" or tostring(fullURI) == "") then
 		error('prefix nor uri can be empty')
 	end
@@ -23,8 +26,8 @@ function Namespace.register(prefix, fullURI)
 		error("namespace uri should end with # or /")
 	end
 	-- $activerdflog.info "Namespace: registering #{fullURI} to #{prefix}"
-	Namespace.namespaces[tostring(prefix)] = tostring(fullURI)
-	Namespace.inverted_namespaces[tostring(fullURI)] = tostring(prefix)
+	namespaces[tostring(prefix)] = tostring(fullURI)
+	inverted_namespaces[tostring(fullURI)] = tostring(prefix)
 
 	-- enable namespace lookups through FOAF::name
 	-- if FOAF defined, add to it
@@ -38,9 +41,9 @@ function Namespace.register(prefix, fullURI)
 	  local mt = {	__tostring = function() return tostring(_prefix) end, 
 						__index = function (self, method, ...)			
 											if method:match("^%u") then
-												return ObjectManager.construct_class(Namespace.lookup(string.lower(tostring(self)), method))												
+												return activerdf.ObjectManager.construct_class(lookup(string.lower(tostring(self)), method))												
 											end
-											return Namespace.lookup(string.lower(tostring(self)), method)
+											return lookup(string.lower(tostring(self)), method)
 										end
 					}
 	  setmetatable(ns, mt)
@@ -56,23 +59,23 @@ function Namespace.register(prefix, fullURI)
  end
 
 
--- returns a resource whose URI is formed by concatenation of prefix and localname
-function Namespace.lookup(prefix, localname)
-	local full_resource = Namespace.expand(prefix, localname)
-	return RDFS.Resource(full_resource)
+--- returns a resource whose URI is formed by concatenation of prefix and localname.
+function lookup(prefix, localname)
+	local full_resource = expand(prefix, localname)
+	return activerdf.RDFS.Resource(full_resource)
 end
 
--- returns URI (string) formed by concatenation of prefix and localname
-function Namespace.expand(prefix, localname)
-	return Namespace.namespaces[prefix]..localname
+--- returns URI (string) formed by concatenation of prefix and localname.
+function expand(prefix, localname)
+	return namespaces[prefix]..localname
 end
 
--- returns prefix (if known) for the non-local part of the URI,
--- or nil if prefix not registered
-function Namespace.prefix(resource)
+--- returns prefix (if known) for the non-local part of the URI,
+-- or nil if prefix not registered.
+function prefix(resource)
 	-- get string representation of resource uri
 	local uri 	
-	if oo.instanceof(resource, RDFS.Resource) then
+	if activerdf.oo.instanceof(resource, activerdf.RDFS.Resource) then
 		uri = resource.uri 
 	else 
 		uri = tostring(resource)
@@ -89,11 +92,11 @@ function Namespace.prefix(resource)
 	-- extract non-local part (including delimiter)
 	local nonlocal = string.sub(uri, 1, delimiter)
 
-	return Namespace.inverted_namespaces[nonlocal]
+	return inverted_namespaces[nonlocal]
 end
 
--- returns local-part of URI
-function Namespace.localname(resource)
+--- returns local-part of URI.
+function localname(resource)
 	if not resource.uri then		
 		error("localname called on something that doesn't respond to uri")
 	end
@@ -114,11 +117,11 @@ function Namespace.localname(resource)
 	end
 end
 
--- returns currently registered namespace abbreviations (e.g. :foaf, :rdf)
-function Namespace.abbreviations()
-	return table.keys(Namespace.namespaces)
+--- returns currently registered namespace abbreviations (e.g 'foaf', 'rdf').
+function abbreviations()
+	return table.keys(namespaces)
 end
 
-Namespace.register('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
-Namespace.register('rdfs', 'http://www.w3.org/2000/01/rdf-schema#')
-Namespace.register('owl', 'http://www.w3.org/2002/07/owl#')
+register('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+register('rdfs', 'http://www.w3.org/2000/01/rdf-schema#')
+register('owl', 'http://www.w3.org/2002/07/owl#')
