@@ -1,7 +1,15 @@
--- ActiveRDF loader
+---------------------------------------------------------------------
+--- ActiveRDF
+-- Lua ActiveRDF is a library for accessing RDF data from Lua programs. In fact, Lua ActiveRDF is a Lua version of ActiveRDF (www.activerdf.org) for Ruby.<br><br>
+-- ActiveRDF allows you to rapidly create semantic applications.<br><br>
+-- ActiveRDF gives you a Domain Specific Language (DSL) for your RDF model: you can 
+-- address RDF resources, classes, properties, etc. programmatically, without queries.<br>
+-- @release $Id$
+-- <br><br><br><br><br><br><br><br><br><br><br><br>
+---------------------------------------------------------------------
+module 'activerdf'
 
-activerdf = {}
-activerdf.oo = require 'loop.simple'
+oo = require 'loop.simple'
 
 -- load standard classes that need to be loaded at startup
 require 'activerdf.table'
@@ -11,9 +19,8 @@ require 'activerdf.objectmanager.bnode'
 require 'activerdf.objectmanager.literal'
 require 'activerdf.federation.activerdf_adapter'
 
-
-local load_adapter = function(s)
-  require(s)
+local function load_adapter (adapter)
+  require(adapter)
 end
 
 load_adapter('activerdf_sparql')
