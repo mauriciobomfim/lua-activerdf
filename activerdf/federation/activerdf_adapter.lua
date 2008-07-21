@@ -26,6 +26,5 @@ end
 ---------------------------------------------------------------------
 --- Generic superclass of all adapters.
 -- @release $Id$
--- LUADOC COMMENTS ARE AT END OF THIS FILE
 ---------------------------------------------------------------------
 module 'activerdf.ActiveRdfAdapter'
