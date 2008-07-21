@@ -1,12 +1,13 @@
--- Translates abstract query into jars2 query.
--- (ignores ASK queries)
+---------------------------------------------------------------------
+--- Translates abstract query into jars2 query.
+-- (ignores ASK queries).
+-- @release $Id$
+---------------------------------------------------------------------
+module "activerdf.Query2Jars2"
 
-module "activerdf"
-
-Query2Jars2 = oo.class{}
-
-
-function Query2Jars2.translate(query)
+--- Translates abstract query into jars2 query.
+-- @return a string
+function translate(query)
 	local str = ""
 	if query._select then
 		-- concatenate each where clause using space: s p o
@@ -21,4 +22,3 @@ function Query2Jars2.translate(query)
 	--$activerdflog.debug "Query2Jars2: translated #{query} to #{str}"
 	return str
 end
-

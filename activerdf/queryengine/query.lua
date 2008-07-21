@@ -113,7 +113,7 @@ end
 --- adds regular expression filter on one variable.
 -- @name filter_regexp
 -- @param variable a string that appears in select/where clause
--- @param regex a string used as regular expression.
+-- @param regexp a string used as regular expression.
 function Query:filter_regexp(variable, regexp)	
 	if not (type(variable) == 'string') then
 		error("variable must be a string")
