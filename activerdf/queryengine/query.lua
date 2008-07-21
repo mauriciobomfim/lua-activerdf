@@ -1,3 +1,11 @@
+---------------------------------------------------------------------
+-- Represents a query on a datasource, abstract representation of SPARQL features. 
+-- Query is passed to federation manager or adapter for execution on data source. 
+-- <br>In all clauses, strings starting with ? represent variables:
+-- <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.
+-- @release $Id$
+-- LUADOC COMMENTS ARE AT END OF THIS FILE
+---------------------------------------------------------------------
 require 'activerdf.federation.federation_manager'
 
 local type = type
@@ -6,18 +14,16 @@ local tostring = tostring
 local tonumber = tonumber
 local pairs = pairs
 local error = error
+local module = module
 
 module "activerdf"
 
--- Represents a query on a datasource, abstract representation of SPARQL 
--- features. Query is passed to federation manager or adapter for execution on 
--- data source.  In all clauses symbols represent variables: 
--- Query.new.select(:s).where(:s,:p,:o).
-
 Query = oo.class{}
 
-function Query.new(...)
-	return Query(...)
+--- creates a new Query.
+-- @name new
+function Query.new()
+	return Query()
 end
 
 function Query:__init()  
@@ -36,14 +42,18 @@ function Query:__init()
 end
 
 
--- Clears the select clauses
+--- clears the select clauses.
+-- @name clear_select
 function  Query:clear_select()
 	-- $activerdflog.debug "cleared select clause"
 	self.select_clauses = {}
 	self._distinct = false
 end
 
--- Adds variables to select clause
+--- adds variables to select clause.
+-- @name select
+-- @param an arbitrary list of arguments.
+-- @usage <code>q:select('?s', '?p')</code>
 function Query:select(...)
 	local s = {...}
 	self._select = true
@@ -55,13 +65,16 @@ function Query:select(...)
 	return self
 end
 
--- Adds variables to ask clause (see SPARQL specification)
+--- adds variables to ask clause (see SPARQL specification).
+-- @name ask
 function Query:ask()
 	self._ask = true
 	return self
 end
 
--- Adds variables to select distinct clause
+--- adds variables to select distinct clause.
+-- @name distinct
+-- @usage <code>q:distinct('?s', '?p')</code>
 function Query:distinct(...)	
 	self._distinct = true	
 	return self:select(...)		
@@ -69,13 +82,15 @@ end
 
 Query.select_distinct = Query.distinct
 
--- Adds variables to count clause
+--- adds variables to count clause.
+-- @name count
 function Query:count(...)	
 	self._count = true
 	return self:select(...)
 end
 
--- Adds sort predicates
+--- adds sort predicates.
+-- @name sort
 function Query:sort(...)
 	-- add sort clauses without duplicates
 	local s = {...}
@@ -84,8 +99,9 @@ function Query:sort(...)
 	return self
 end
 
--- adds one or more generic filters
--- NOTE: you have to use SPARQL syntax for variables, eg. regex(?s, 'abc')
+--- adds one or more generic filters.
+-- NOTE: you have to use SPARQL syntax for variables, eg. ('?s', 'abc').
+-- @name filter
 function Query:filter(...)
 	local s = {...}
 	-- add filter clauses
@@ -94,9 +110,10 @@ function Query:filter(...)
 	return self
 end
 
--- adds regular expression filter on one variable
--- variable is string that appears in select/where clause, regex is a string 
--- used as regular expression
+--- adds regular expression filter on one variable.
+-- @name filter_regexp
+-- @param variable a string that appears in select/where clause
+-- @param regex a string used as regular expression.
 function Query:filter_regexp(variable, regexp)	
 	if not (type(variable) == 'string') then
 		error("variable must be a string")
@@ -111,10 +128,11 @@ end
 
 Query.filter_regex = Query.filter_regexp
 
-
--- adds operator filter one one variable
--- variable is a string that appears in select/where clause, operator is a 
--- SPARQL operator (e.g. '>'), operand is a SPARQL value (e.g. 15)
+--- adds operator filter one one variable.
+-- @name filter_operator
+-- @param variable a string that appears in select/where clause
+-- @param operator a SPARQL operator (e.g. '>')
+-- @param operand a SPARQL value (e.g. 15)
 function Query:filter_operator(variable, operator, operand)	
 	if not (type(variable) == 'string') then
 		error("variable must be a string")
@@ -123,9 +141,14 @@ function Query:filter_operator(variable, operator, operand)
 	return self:filter ("?"..variable.." "..operator.." "..operand)
 end
 
--- filter variable on specified language tag, e.g. lang(:o, 'en')
--- optionally matches exactly on language dialect, otherwise only 
--- language-specifier is considered
+--- filter variable on specified language tag.
+-- Optionally matches exactly on language dialect, otherwise only 
+-- language-specifier is considered.
+-- @name lang
+-- @param variable a SPARQL variable
+-- @param tag a language tag
+-- @param exact true or false. If not specified, the default is false.
+-- @usage <code>q:lang('?o', 'en')</code>
 function Query:lang(variable, tag, exact)
 	local exact = exact or false
 	if exact then
@@ -135,7 +158,8 @@ function Query:lang(variable, tag, exact)
 	end
 end
 
--- adds reverse sorting predicates
+--- adds reverse sorting predicates.
+-- @name reverse_sort
 function Query:reverse_sort(...)
 	local s = {...}
 	-- add sort clauses without duplicates
@@ -144,21 +168,28 @@ function Query:reverse_sort(...)
 	return self
 end
 
--- Adds limit clause (maximum number of results to return)
-function Query:limit(i)
-	self.limits = tonumber(i)
+--- adds limit clause (maximum number of results to return).
+-- @name limit
+function Query:limit(number)
+	self.limits = tonumber(number)
 	return self
 end
 
--- Add offset clause (ignore first n results)
-function Query:offset(i)
-	self.offsets = tonumber(i)
+--- adds offset clause (ignore first n results).
+-- @name offset
+function Query:offset(number)
+	self.offsets = tonumber(number)
 	return self
 end
 
--- Adds where clauses (s,p,o) where each constituent is either variable ('?s') or 
--- an RDFS.Resource. Keyword queries are specified with the special 'keyword'
--- symbol: Query.new.select('?s').where('?s', 'keyword', 'eyal')
+--- adds where clauses (s,p,o) where each constituent is either variable ('?s') or an RDFS.Resource. 
+-- Keyword queries are specified with the special '?keyword' string.
+-- <br><br><code>Query.new():select('?s'):where('?s', '?keyword', 'eyal')<code>
+-- @name where
+-- @param s subject
+-- @param p predicate
+-- @param o object
+-- @param c 
 function Query:where(s,p,o,c)
 	if p == '?keyword' then
 		-- treat keywords in where-clauses specially
@@ -182,8 +213,8 @@ function Query:where(s,p,o,c)
 	return self
 end
 
--- Adds keyword constraint to the query. You can use all Ferret query syntax in 
--- the constraint (e.g. keyword_where(:s,'eyal|benjamin')
+-- adds keyword constraint to the query. You can use all Ferret query syntax in 
+-- the constraint (e.g. keyword_where('?s','eyal|benjamin')
 function Query:keyword_where(s,o)
 	self.keyword = true
 	local s = self:parametrise(s)
@@ -195,14 +226,16 @@ function Query:keyword_where(s,o)
 	return self
 end
 
--- Executes query on data sources. Either returns result as array
+--- executes query on data sources. Either returns result as a table indexed numerically
 -- (flattened into single value unless specified otherwise)
--- or executes a block (number of block variables should be
+-- or executes a function (number of function parameters should be
 -- same as number of select variables)
---
--- usage:: results = query.execute
--- usage:: query.execute do |s,p,o| ... end
-function Query:execute(options, block)
+-- @name execute
+-- @param options e.g 'flatten'
+-- @param func a function
+-- @usage <code>results = query:execute()</code>
+-- @usage <code>query:execute ( nil, function(s,p,o) ... end )
+function Query:execute(options, func)
 	if not options then
 		options = { flatten = false }
 	end	
@@ -210,9 +243,9 @@ function Query:execute(options, block)
 		options = {flatten = true} 
 	end
 	
-	if type(block) == 'function' then		
+	if type(func) == 'function' then		
 		for index, result in pairs(FederationManager.query(self, options)) do
-			return block(unpack(result))
+			return func(unpack(result))
 		end
 	else		
 		return FederationManager.query(self, options)
@@ -220,7 +253,7 @@ function Query:execute(options, block)
 end
 
 -- Returns query string depending on adapter (e.g. SPARQL, N3QL, etc.)
-function Query:__tsostring()
+function Query:__tostring()
 	if not ConnectionPool.read_adapters()[1] then		
 		return self:inspect()
 	else				
@@ -228,7 +261,8 @@ function Query:__tsostring()
 	end
 end
 
--- Returns SPARQL serialisation of query
+--- Returns SPARQL serialisation of query.
+-- @name to_sp
 function Query:to_sp()
 	require 'activerdf.queryengine.query2sparql'
 	return Query2SPARQL.translate(self)
@@ -270,3 +304,13 @@ function Query:inspect(old)
 	end
 	return str
 end
+
+-- it is here just because of luadoc
+---------------------------------------------------------------------
+--- Represents a query on a datasource, abstract representation of SPARQL features. 
+-- Query is passed to federation manager or adapter for execution on data source. 
+-- <br>In all clauses, strings starting with ? represent variables:
+-- <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf.Query'
