@@ -687,7 +687,7 @@ end
 -- without worrying whether paper.creator is single- or multi-valued
 -- alias include? ==
 
---- returns uri of resource, can be overridden in subclasses.
+-- returns uri of resource, can be overridden in subclasses.
 -- called by lua tostring 
 -- @name __tostring
 -- @usage <code>tostring(resource)</code>
@@ -889,15 +889,15 @@ end
 -- it is here just because of luadoc
 ---------------------------------------------------------------------
 --- Represents an RDF resource. Manages manipulations of that resource,
--- including data lookup (e.g. eyal.age), data updates (e.g. eyal.age=20),
--- class-level lookup (Person:find_by_name 'eyal'), and class-membership
--- (eyal.class ...Person).<br>
+-- including data lookup (e.g. john.age), data updates (e.g. john.age=20),
+-- class-level lookup (Person:find_by_name 'john'), and class-membership
+-- (oo.classof(john) ...Person).<br>
 -- <br/><b>Dynamic attribute-based finders</b><br/><br/>
 -- Dynamic attribute-based finders work by appending the name of an attribute to find_by_, 
 -- so you get finders like <code>Person:find_by_name(name)</code>, <code>Person:find_by_last_name(last_name)</code>, 
 -- <code>Payment:find_by_transaction_id(transaction_id)</code>.<br> 
--- So instead of writing <code>Person:find( { where = { name = "eyal" } } )</code>, 
--- you just do <code>Person:find_by_name("eyal")</code>. 
+-- So instead of writing <code>Person:find( { where = { name = "john" } } )</code>, 
+-- you just do <code>Person:find_by_name("john")</code>. 
 -- It‘s also possible to use multiple attributes in the same find by separating them with "and", 
 -- so you get finders like <code>Person:find_by_user_name_and_password(user_name, password)</code> or 
 -- even <code>Payment:find_by_purchaser_and_state_and_country(purchaser, state, country)</code>.<br>
