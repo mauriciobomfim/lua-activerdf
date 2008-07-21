@@ -2,7 +2,7 @@
 --- Maintains pool of adapter instances that are connected to datasources. 
 -- Returns right adapter for a given datasource, by either reusing an
 -- existing adapter-instance or creating new a adapter-instance.
---
+-- 
 -- @release $Id$
 ---------------------------------------------------------------------
 local table = activerdf.table
