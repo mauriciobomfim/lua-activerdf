@@ -43,9 +43,9 @@ end
 -- complete read-pool and aggregating the results.
 -- @param q query (instance of Query class)
 -- @param options e.g <code>{ flatten = true }</code>
--- @param block function for traverse query results
+-- @param func function for traverse query results
 -- @return a table containing the query results
-function query(q, options, block)	
+function query(q, options, func)	
 	local options = options or { flatten = true }	
 	-- build Array of results from all sources
 	-- TODO: write test for sebastian's select problem
@@ -59,11 +59,11 @@ function query(q, options, block)
 
 	-- ask each adapter for query results
 	-- and yield them consequtively
-	if type(block) == 'function' then
+	if type(func) == 'function' then
 		table.foreach(ConnectionPool.read_adapters(), function(index, source)
 			--check that if is correct: source:query(q) do |*clauses|			
 			table.foreach(source:query(q), function(index, clauses)								
-				block(unpack(clauses))
+				func(unpack(clauses))
 			end)
 		end)
 	else
