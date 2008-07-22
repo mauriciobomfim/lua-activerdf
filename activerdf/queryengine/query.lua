@@ -189,7 +189,7 @@ end
 -- @param s subject
 -- @param p predicate
 -- @param o object
--- @param c 
+-- @param c context
 function Query:where(s,p,o,c)
 	if p == '?keyword' then
 		-- treat keywords in where-clauses specially

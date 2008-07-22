@@ -1,3 +1,14 @@
+-- -------------------------------------------------------------------
+-- Lua RDFLite is a small RDF datastore, based on sqlite3. 
+-- Its a Lua version of rdflite for ruby. 
+-- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
+-- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
+-- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
+-- arbitrary joins in the where clauses). Unlike ruby rdflite Lua RDFLite does not offers 
+-- full-text search over the literals yet. 
+-- LUADOC COMMENTS ARE AT END OF THIS FILE
+-- -------------------------------------------------------------------
+local module = module
 require 'activerdf'
 require 'activerdf.queryengine.ntriples_parser'
 
@@ -49,10 +60,9 @@ end
 local alias_number = function(index)	
 	return math.floor ( ( index - 1 ) / 4 )
 end
------------------------------------------------------------------------------
+
 -- Prepares a SQL statement using placeholders.
 -- Extracted from http://sputnik.freewisdom.org
------------------------------------------------------------------------------
 local function prepare(statement, ...)
 	local count = select('#', ...)
 
@@ -80,10 +90,6 @@ local function prepare(statement, ...)
 	return statement
 end
 
-
--- RDFLite is a lightweight RDF database on top of sqlite3. It can act as adapter 
--- in ActiveRDF. It supports on-disk and in-memory usage, and allows keyword 
--- search if ferret is installed.
 module "activerdf_rdflite"
 
 RDFLite = oo.class({}, ActiveRdfAdapter)
@@ -92,13 +98,16 @@ ConnectionPool.register_adapter('rdflite', RDFLite)
 
 -- bool_accessor :keyword_search, :reasoning
 
--- instantiates RDFLite database
+--- instantiates RDFLite database.
 -- available parameters:
--- * :location => filepath (defaults to memory)
--- * :keyword => true/false (defaults to false)
--- * :pidx, :oidx, etc. => true/false (enable/disable these indices)
-function RDFLite.new(...)
-	return RDFLite(...)
+-- @name new
+-- @param params a table with the following fields: <br>
+-- location = filepath (defaults to memory)<br>
+-- keyword = true/false (defaults to false)<br>
+-- pidx, oidx, etc. = true/false (enable/disable these indices)<br>
+-- @usage <code>db = RDFLite.new { location = '/path/to/file.db' }</code>
+function RDFLite.new(params)
+	return RDFLite(params)
 end
 
 function RDFLite:__init(params)
@@ -157,7 +166,9 @@ function RDFLite:__init(params)
 	return obj
 end
 
--- returns the number of triples in the datastore (incl. possible duplicates)
+--- returns the number of triples in the datastore (incl. possible duplicates).
+-- @name size
+-- @usage <code>db:size()</code>
 function RDFLite:size()
 	local cur = self.db:execute('select count(*) from triple')
 	local result = tonumber(cur:fetch())
@@ -165,7 +176,9 @@ function RDFLite:size()
 	return result
 end
 
--- returns all triples in the datastore
+--- returns all triples in the datastore.
+-- @name dump
+-- @usage <code>db:dump()</code>
 function RDFLite:dump()
 	local row = {}
 	local result = {}
@@ -181,21 +194,30 @@ function RDFLite:dump()
 	return result
 end
 
--- deletes all triples from datastore
+--- deletes all triples from datastore.
+-- @name clear
+-- @usage <code>db:clear()</code>
 function RDFLite:clear()
 	self.db:execute('delete from triple')
 end
 
--- close adapter and remove it from the ConnectionPool
+--- close adapter and remove it from the ConnectionPool.
+-- @name close
+-- @usage <code>db:close()</code>
 function RDFLite:close()
 	ConnectionPool.remove_data_source(self)
 	self.db:close()
 end
 
--- deletes triple(s,p,o,c) from datastore
--- symbol parameters match anything: delete(:s,:p,:o) will delete all triples
--- you can specify a context to limit deletion to that context: 
--- delete(:s,:p,:o, 'http://context') will delete all triples with that context
+--- deletes triple(s,p,o,c) from datastore.
+-- @name delete
+-- @param s subject
+-- @param p predicate
+-- @param o object
+-- @param c context
+-- @usage Strings starting with ? parameters match anything: <code>db:delete('?s','?p','?o')</code> will delete all triples.<br>
+-- You can specify a context to limit deletion to that context:<br> 
+-- <code>db:delete('?s','?p','?o', 'http://context')</code> will delete all triples with that context.
 function RDFLite:delete(s, p, o, c)
 	-- convert non-nil input to internal format
 	local quad = table.map ( {s,p,o,c}, function(i,r) return r and self:internalise(r) end )
@@ -231,8 +253,18 @@ function RDFLite:delete(s, p, o, c)
 	return self.db
 end
 
--- adds triple(s,p,o) to datastore
--- s,p must be resources, o can be primitive data or resource
+--- adds triple(s,p,o) to datastore.
+-- s,p must be resources (instance of RDFS.Resource), o can be primitive data or resource.
+-- @name add
+-- @param s subject
+-- @param p predicate
+-- @param o object
+-- @param c context
+-- @usage <code>
+-- john = Person.new 'http://www.exemple.org/john'<br>
+-- age = Resource 'foaf:age'<br>
+-- db:add(john, age, "27")
+-- </code>
 function RDFLite:add(s,p,o,c)
 	-- check illegal input
 	if not s['uri'] then
@@ -255,14 +287,19 @@ function RDFLite:add(s,p,o,c)
 	--@ferret << {:subject => s, :object => o} if keyword_search?
 end
 
--- flushes openstanding changes to underlying sqlite3
+--- flushes openstanding changes to underlying sqlite3.
+-- @name flush
+-- @usage <code>db:flush</code>
 function  RDFLite:flush()
 	-- since we always write changes into sqlite3 immediately, we don't do 
 	-- anything here
 	return true
 end
 
--- loads triples from file in ntriples format
+--- loads triples from file in ntriples format.
+-- @name load
+-- @param location path to file
+-- @usage <code>db:load('/path/to/file.nt')</code>
 function RDFLite:load(location)	
 	local context
 	if URI:new(location)._host then
@@ -296,7 +333,14 @@ function RDFLite:load(location)
  --end
 end
 
--- adds ntriples from given context into datastore
+--- adds ntriples from given context into datastore.
+-- @name add_ntriples
+-- @param ntriples a string of ntriples
+-- @param context a string for context
+-- @usage <code>
+-- nt = "&lt;http://activerdf.org/test/age> &lt;http://www.w3.org/2000/01/rdf-schema#domain> &lt;http://www.w3.org/2000/01/rdf-schema#Resource>"<br>
+-- db:add_ntriples(nt)
+-- </code>
 function RDFLite:add_ntriples(ntriples, context)
 	-- add each triple to db	
 	local insert
@@ -321,7 +365,13 @@ function RDFLite:add_ntriples(ntriples, context)
 	return self.db
 end
 
--- executes ActiveRDF query on datastore
+--- executes ActiveRDF query on datastore.
+-- @name query
+-- @query an instace of Query
+-- @usage <code>
+-- q = Query.new():select('?s', '?p', '?o')<br>
+-- db:query(q)
+--</code>
 function RDFLite:query(query)
 	
 	-- construct query clauses
@@ -352,7 +402,8 @@ function RDFLite:query(query)
 	end
 end
 
--- translates ActiveRDF query into internal sqlite query string
+--- translates ActiveRDF query into internal sqlite query string.
+-- @name translate
 function RDFLite:translate(query)
 	local where, conditions = self:construct_where(query)
 	local sql = self:construct_select(query) .. self:construct_join(query) .. where .. self:construct_sort(query) .. self:construct_limit(query) 
@@ -728,3 +779,16 @@ function RDFLite:serialise(r)
 		return '"'..tostring(r)..'"'
 	end
 end
+
+-- it is here just because of luadoc
+---------------------------------------------------------------------
+--- Lua RDFLite is a small RDF datastore, based on sqlite3. 
+-- Its a Lua version of rdflite for ruby. 
+-- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
+-- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
+-- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
+-- arbitrary joins in the where clauses). Unlike ruby rdflite Lua RDFLite does not offers 
+-- full-text search over the literals yet. 
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf_rdflite.RDFLite'

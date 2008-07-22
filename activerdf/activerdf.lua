@@ -3,8 +3,12 @@
 -- Lua ActiveRDF allows you to rapidly create semantic web applications.<br><br>
 -- Lua ActiveRDF gives you a Domain Specific Language (DSL) for your RDF model: you can 
 -- address RDF resources, classes, properties, etc. programmatically, without queries.<br>
+-- <br>
+-- Lua ActiveRDF uses the module loop.simple (<a href="http://loop.luaforge.net">http://loop.luaforge.net</a>) 
+-- to simulate class-based object-oriented programming. 
+-- The API of loop.simple is available as the module <code><b>activerdf.oo</b></code>.<br>  
 -- @release $Id$
--- <br><br><br><br><br><br><br><br><br><br><br><br>
+--<br><br><br><br><br><br><br><br><br>
 ---------------------------------------------------------------------
 local require = require
 
