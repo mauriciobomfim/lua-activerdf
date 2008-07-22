@@ -6,6 +6,8 @@
 -- @release $Id$
 -- <br><br><br><br><br><br><br><br><br><br><br><br>
 ---------------------------------------------------------------------
+local require = require
+
 module 'activerdf'
 
 oo = require 'loop.simple'
