@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------
 -- Lua ActiveRDF is a library for accessing RDF data from Lua programs. In fact, Lua ActiveRDF is a Lua version of ActiveRDF (www.activerdf.org) for Ruby.<br><br>
--- Lua ActiveRDF allows you to rapidly create semantic applications.<br><br>
+-- Lua ActiveRDF allows you to rapidly create semantic web applications.<br><br>
 -- Lua ActiveRDF gives you a Domain Specific Language (DSL) for your RDF model: you can 
 -- address RDF resources, classes, properties, etc. programmatically, without queries.<br>
 -- @release $Id$
