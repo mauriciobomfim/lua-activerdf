@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/activerdf.html">activerdf</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ActiveRdfAdapter.html">activerdf.ActiveRdfAdapter</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ConnectionPool.html">activerdf.ConnectionPool</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.FederationManager.html">activerdf.FederationManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Literal.html">activerdf.Literal</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.NTriplesParser.html">activerdf.NTriplesParser</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Namespace.html">activerdf.Namespace</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ObjectManager.html">activerdf.ObjectManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query.html">activerdf.Query</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2Jars2.html">activerdf.Query2Jars2</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2SPARQL.html">activerdf.Query2SPARQL</a>
+	</li>
+
+	<li><strong>activerdf.RDFS.Resource</strong></li>
+	
+	<li>
+		<a href="../modules/activerdf.string.html">activerdf.string</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.table.html">activerdf.table</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_rdflite.RDFLite.html">activerdf_rdflite.RDFLite</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_sparql.SparqlAdapter.html">activerdf_sparql.SparqlAdapter</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>activerdf.RDFS.Resource</code></h1>
+
+<p>Represents an RDF resource. Manages manipulations of that resource, including data lookup (e.g. john.age), data updates (e.g. john.age=20), class-level lookup (Person:find_by_name 'john'), and class-membership (oo.classof(john) ...Person).<br> <br/><b>Dynamic attribute-based finders</b><br/><br/> Dynamic attribute-based finders work by appending the name of an attribute to find_by_, so you get finders like <code>Person:find_by_name(name)</code>, <code>Person:find_by_last_name(last_name)</code>, <code>Payment:find_by_transaction_id(transaction_id)</code>.<br> So instead of writing <code>Person:find( { where = { name = "john" } } )</code>, you just do <code>Person:find_by_name("john")</code>. It‘s also possible to use multiple attributes in the same find by separating them with "and", so you get finders like <code>Person:find_by_user_name_and_password(user_name, password)</code> or even <code>Payment:find_by_purchaser_and_state_and_country(purchaser, state, country)</code>.<br></p>
+
+
+
+<p><small><b>Release:</b> $Id$ </small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#add_predicate">add_predicate</a>&nbsp;(localname, fulluri)</td>
+	<td class="summary">defines a localname for a predicate URI.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#class_level_predicates">class_level_predicates</a>&nbsp;()</td>
+	<td class="summary">returns all predicates that fall into the domain of the rdf:type of this resource.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#direct_predicates">direct_predicates</a>&nbsp;(distinct)</td>
+	<td class="summary">returns all predicates that are directly defined for this resource.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#find">find</a>&nbsp;(...)</td>
+	<td class="summary">returns a table of all instances of this class respecting the filters params ...</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#find_all">find_all</a>&nbsp;(self, ...)</td>
+	<td class="summary">returns a table of all instances of this class.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#instanceof">instanceof</a>&nbsp;(klass)</td>
+	<td class="summary">overrides built-in instance_of to use rdf:type definitions.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#new">new</a>&nbsp;(uri)</td>
+	<td class="summary">creates new resource representing an RDF resource.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#predicates">predicates</a>&nbsp;()</td>
+	<td class="summary">returns the predicates that have this resource as their domain.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#save">save</a>&nbsp;()</td>
+	<td class="summary">saves instance into datastore.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#type">type</a>&nbsp;()</td>
+	<td class="summary">returns all rdf:type of this instance.</td>
+	</tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="add_predicate"></a><strong>add_predicate</strong>&nbsp;(localname, fulluri)</dt>
+<dd>
+defines a localname for a predicate URI. localname should be a string, fulluri a Resource or string.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  localname: 
+	</li>
+	
+	<li>
+	  fulluri: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>resource:add_predicate('name', FOAF.lastName)</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="class_level_predicates"></a><strong>class_level_predicates</strong>&nbsp;()</dt>
+<dd>
+returns all predicates that fall into the domain of the rdf:type of this resource.
+
+
+
+
+
+<h3>Usage:</h3>
+<code>resource:class_level_predicates()</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="direct_predicates"></a><strong>direct_predicates</strong>&nbsp;(distinct)</dt>
+<dd>
+returns all predicates that are directly defined for this resource.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  distinct: true or false
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>resource:direct_predicates(true)</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="find"></a><strong>find</strong>&nbsp;(...)</dt>
+<dd>
+returns a table of all instances of this class respecting the filters params ...
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: table with filter fields where, order, reverse_order, context, limit and offset
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>Person:find{ where = { name = "eyal" } }</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="find_all"></a><strong>find_all</strong>&nbsp;(self, ...)</dt>
+<dd>
+returns a table of all instances of this class. (always returns collection)
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>Person:find_all()</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="instanceof"></a><strong>instanceof</strong>&nbsp;(klass)</dt>
+<dd>
+overrides built-in instance_of to use rdf:type definitions.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  klass: a LOOP class
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>resource:instanceof(klass)</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="new"></a><strong>new</strong>&nbsp;(uri)</dt>
+<dd>
+creates new resource representing an RDF resource.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  uri: an uri string or a resource
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>Resource.new('http://www.example.org/resource')</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="predicates"></a><strong>predicates</strong>&nbsp;()</dt>
+<dd>
+returns the predicates that have this resource as their domain. (applicable predicates for this resource).
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="save"></a><strong>save</strong>&nbsp;()</dt>
+<dd>
+saves instance into datastore.
+
+
+
+
+
+<h3>Usage:</h3>
+<code>resource = Resource.new('http://www.example.com/resource') <br>resource:save()</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="type"></a><strong>type</strong>&nbsp;()</dt>
+<dd>
+returns all rdf:type of this instance.  Note: this method performs a database lookup for { self rdf:type ?o }. For simple type-checking (to know if you are handling an ActiveRDF object, use oo.classof(self), which does not do a database query, but simply returns RDFS::Resource.
+
+
+
+
+
+<h3>Usage:</h3>
+<code>resource:type()</code>
+
+
+
+<h3>Return value:</h3>
+e.g. { RDFS.Resource, FOAF.Person }
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

@@ -1,0 +1,748 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/activerdf.html">activerdf</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ActiveRdfAdapter.html">activerdf.ActiveRdfAdapter</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ConnectionPool.html">activerdf.ConnectionPool</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.FederationManager.html">activerdf.FederationManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Literal.html">activerdf.Literal</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.NTriplesParser.html">activerdf.NTriplesParser</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Namespace.html">activerdf.Namespace</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ObjectManager.html">activerdf.ObjectManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query.html">activerdf.Query</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2Jars2.html">activerdf.Query2Jars2</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2SPARQL.html">activerdf.Query2SPARQL</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.RDFS.Resource.html">activerdf.RDFS.Resource</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.string.html">activerdf.string</a>
+	</li>
+
+	<li><strong>activerdf.table</strong></li>
+	
+	<li>
+		<a href="../modules/activerdf_rdflite.RDFLite.html">activerdf_rdflite.RDFLite</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_sparql.SparqlAdapter.html">activerdf_sparql.SparqlAdapter</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>activerdf.table</code></h1>
+
+<p>Extends the default lua table functions.</p>
+
+
+
+<p><small><b>Release:</b> $Id$ </small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#add">add</a>&nbsp;(tbl1, tbl2)</td>
+	<td class="summary">concatenation — returns a new table built by concatenating the two tables together to produce a third table.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#all">all</a>&nbsp;(tbl, func)</td>
+	<td class="summary">passes each element of the table to the given function and returns <code>true</code> if the function never returns <code>false</code> or <code>nil</code>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#any">any</a>&nbsp;(tbl, func)</td>
+	<td class="summary">passes each element of the table to the given function and returns <code>true</code> if the function ever returns a value other that <code>false</code> or <code>nil</code>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#difference">difference</a>&nbsp;(a, b)</td>
+	<td class="summary">returns a table with the difference of <em>a</em> and <em>b</em>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#dup">dup</a>&nbsp;(tbl)</td>
+	<td class="summary">produces a shallow copy of table <em>tbl</em>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#empty">empty</a>&nbsp;(tbl)</td>
+	<td class="summary">returns <code>true</code> if <em>tbl</em> table contains no elements.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#equals">equals</a>&nbsp;(tbl1, tbl2)</td>
+	<td class="summary">equality of two tables.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#flatten">flatten</a>&nbsp;(tbl)</td>
+	<td class="summary">returns a new table that is a one-dimensional flattening of this table (recursively).</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#include">include</a>&nbsp;(tbl, value)</td>
+	<td class="summary">returns <code>true</code> if the given <em>value</em> is present in <em>tbl</em>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#inject">inject</a>&nbsp;(init, tbl, func)</td>
+	<td class="summary">combines the elements of <em>tbl</em> by applying the function func to an accumulator value (<em>memo</em>) and each <em>element</em> in turn.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#intersection">intersection</a>&nbsp;(a, b)</td>
+	<td class="summary">returns a table with the intersection of <em>a</em> and <em>b</em>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#keys">keys</a>&nbsp;(tbl)</td>
+	<td class="summary">returns a new table populated with the keys (fields) from this table.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#map">map</a>&nbsp;(self, func, ...)</td>
+	<td class="summary">invokes <em>func</em> once for each element of self.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#reject">reject</a>&nbsp;(self, func, ...)</td>
+	<td class="summary">returns a new table containing the items in <em>self</em> for which the function <em>func</em> is not <code>true</code>.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#select">select</a>&nbsp;(self, func, ...)</td>
+	<td class="summary">invokes the function <em>func</em> passing in successive elements from table, returning a table containing those elements for which the function returns a <code>true</code> value.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#uniq">uniq</a>&nbsp;(tbl)</td>
+	<td class="summary">returns a new table by removing duplicate values in <em>tbl</em>.</td>
+	</tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="add"></a><strong>add</strong>&nbsp;(tbl1, tbl2)</dt>
+<dd>
+concatenation — returns a new table built by concatenating the two tables together to produce a third table.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl1: 
+	</li>
+	
+	<li>
+	  tbl2: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>table.add( { 1, 2, 3 } , { 4, 5 } )    --> { 1, 2, 3, 4, 5 }</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="all"></a><strong>all</strong>&nbsp;(tbl, func)</dt>
+<dd>
+passes each element of the table to the given function and returns <code>true</code> if the function never returns <code>false</code> or <code>nil</code>. If the function is not given, it adds an implicit <code>function(i,obj) return obj end</code>. That is, table.all will return <code>true</code> only if none of the <em>tbl</em> members are <code>false</code> or <code>nil</code>.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+	<li>
+	  func: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="any"></a><strong>any</strong>&nbsp;(tbl, func)</dt>
+<dd>
+passes each element of the table to the given function and returns <code>true</code> if the function ever returns a value other that <code>false</code> or <code>nil</code>. If the function is not given, it adds an implicit <code>function(i,v) return v end</code>. That is, table.any will return <code>true</code> if at least one of the <em>tbl</em> members is not <code>false</code> or <code>nil</code>.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+	<li>
+	  func: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="difference"></a><strong>difference</strong>&nbsp;(a, b)</dt>
+<dd>
+returns a table with the difference of <em>a</em> and <em>b</em>.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  a: 
+	</li>
+	
+	<li>
+	  b: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="dup"></a><strong>dup</strong>&nbsp;(tbl)</dt>
+<dd>
+produces a shallow copy of table <em>tbl</em>. The elements of <em>tbl</em> are copied, but not the inside table references.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> a = { 1, 2, 3 }<br> b = table.dup(a)<br> table.equals(a, b) --> true <br> print(a) --> table: 0032B850 <br> print(b) --> table: 0032BA18 </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="empty"></a><strong>empty</strong>&nbsp;(tbl)</dt>
+<dd>
+returns <code>true</code> if <em>tbl</em> table contains no elements.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> table.empty({})   --> true</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="equals"></a><strong>equals</strong>&nbsp;(tbl1, tbl2)</dt>
+<dd>
+equality of two tables. Tables are equal if they each contain the same number of fields and if each field-value pair is equal to (according to ==) the corresponding elements in the other table.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl1: 
+	</li>
+	
+	<li>
+	  tbl2: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> h1 = { a = 1, c = 2 }<br> h2 = { [7] = 35, c = 2, a = 1 }<br> h3 = { a = 1, c = 2, [7] = 35 }<br> h4 = { a = 1, d = 2, f = 35 }<br> table.equals ( h1, h2 ) --> false<br> table.equals ( h2, h3 ) --> true<br> table.equals ( h3, h4 ) --> false<br> </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="flatten"></a><strong>flatten</strong>&nbsp;(tbl)</dt>
+<dd>
+returns a new table that is a one-dimensional flattening of this table (recursively). That is, for every element that is a table, extract its elements into the new table.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> s = { 1, 2, 3 }           --> { 1, 2, 3 }<br> t = { 4, 5, 6, { 7, 8 } } --> { 4, 5, 6, { 7, 8 } }<br> a = { s, t, 9, 10 }       --> { { 1, 2, 3 }, { 4, 5, 6, { 7, 8 } }, 9, 10 }<br> a = table.flatten(a)      --> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="include"></a><strong>include</strong>&nbsp;(tbl, value)</dt>
+<dd>
+returns <code>true</code> if the given <em>value</em> is present in <em>tbl</em>. That is, if any element == value, false otherwise.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+	<li>
+	  value: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> a = { "a", "b", "c" }<br> table.include(a, "b")   --> true<br> table.include(a, "z")   --> false </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="inject"></a><strong>inject</strong>&nbsp;(init, tbl, func)</dt>
+<dd>
+combines the elements of <em>tbl</em> by applying the function func to an accumulator value (<em>memo</em>) and each <em>element</em> in turn. At each step, <em>memo</em> is set to the value returned by the function func. You can supply an initial value for <em>memo</em> using the parameter <em>init</em>. If <em>init</em> is ommited it uses the first element of the table as a the initial value (and skips that element while iterating).
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  init: initial value for <em>memo</em>.
+	</li>
+	
+	<li>
+	  tbl: a table.
+	</li>
+	
+	<li>
+	  func: <code>function( memo, element ) ... end</code>
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> -- Sum some numbers<br> table.inject ( {1,2,3}, function(sum, n) return sum + n end ) --> 6<br><br> -- Multiply some numbers<br> table.inject (1, {1,2,3,4}, function(product, n) return product * n end ) --> 24<br> <br> -- Multiple tables intersection<br> t = {{1,2,3}, {2,3}, {3,4}}<br> table.inject( t, function( intersec, n ) return table.intersection(intersec, n) end ) --> { 3 } </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="intersection"></a><strong>intersection</strong>&nbsp;(a, b)</dt>
+<dd>
+returns a table with the intersection of <em>a</em> and <em>b</em>.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  a: 
+	</li>
+	
+	<li>
+	  b: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="keys"></a><strong>keys</strong>&nbsp;(tbl)</dt>
+<dd>
+returns a new table populated with the keys (fields) from this table.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>h = { a = 100, b = 200, c = 300, d = 400 } <br>table.keys(h) --> { "a", "b", "c", "d" }</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="map"></a><strong>map</strong>&nbsp;(self, func, ...)</dt>
+<dd>
+invokes <em>func</em> once for each element of self. Creates a new table containing the values returned by the function.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+	<li>
+	  func: 
+	</li>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> a = { "a", "b", "c", "d" }<br> table.map ( a, function(i, x) return  x .. "!" end)   --> { "a!", "b!", "c!", "d!" }<br> a --> { "a", "b", "c", "d" } </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="reject"></a><strong>reject</strong>&nbsp;(self, func, ...)</dt>
+<dd>
+returns a new table containing the items in <em>self</em> for which the function <em>func</em> is not <code>true</code>.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+	<li>
+	  func: 
+	</li>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="select"></a><strong>select</strong>&nbsp;(self, func, ...)</dt>
+<dd>
+invokes the function <em>func</em> passing in successive elements from table, returning a table containing those elements for which the function returns a <code>true</code> value.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+	<li>
+	  func: 
+	</li>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code> a = { 'a', 'b', 'c', 'd', 'e', 'f' }<br> table.select ( a, function(i,v) return string.find(v, "[aeiou]") end )   --> { "a", "e" } </code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="uniq"></a><strong>uniq</strong>&nbsp;(tbl)</dt>
+<dd>
+returns a new table by removing duplicate values in <em>tbl</em>.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  tbl: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>a = { "a", "a", "b", "b", "c" }<br> table.uniq(a)   --> { "a", "b", "c" }</code>
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

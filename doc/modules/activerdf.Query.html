@@ -1,0 +1,708 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/activerdf.html">activerdf</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ActiveRdfAdapter.html">activerdf.ActiveRdfAdapter</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ConnectionPool.html">activerdf.ConnectionPool</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.FederationManager.html">activerdf.FederationManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Literal.html">activerdf.Literal</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.NTriplesParser.html">activerdf.NTriplesParser</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Namespace.html">activerdf.Namespace</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ObjectManager.html">activerdf.ObjectManager</a>
+	</li>
+
+	<li><strong>activerdf.Query</strong></li>
+	
+	<li>
+		<a href="../modules/activerdf.Query2Jars2.html">activerdf.Query2Jars2</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2SPARQL.html">activerdf.Query2SPARQL</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.RDFS.Resource.html">activerdf.RDFS.Resource</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.string.html">activerdf.string</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.table.html">activerdf.table</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_rdflite.RDFLite.html">activerdf_rdflite.RDFLite</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_sparql.SparqlAdapter.html">activerdf_sparql.SparqlAdapter</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>activerdf.Query</code></h1>
+
+<p>Represents a query on a datasource, abstract representation of SPARQL features. Query is passed to federation manager or adapter for execution on data source. <br>In all clauses, strings starting with ? represent variables: <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.</p>
+
+
+
+<p><small><b>Release:</b> $Id$ </small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#ask">ask</a>&nbsp;()</td>
+	<td class="summary">adds variables to ask clause (see SPARQL specification).</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#clear_select">clear_select</a>&nbsp;()</td>
+	<td class="summary">clears the select clauses.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#count">count</a>&nbsp;(...)</td>
+	<td class="summary">adds variables to count clause.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#distinct">distinct</a>&nbsp;(...)</td>
+	<td class="summary">adds variables to select distinct clause.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#execute">execute</a>&nbsp;(options, func)</td>
+	<td class="summary">executes query on data sources.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#filter">filter</a>&nbsp;(...)</td>
+	<td class="summary">adds one or more generic filters.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#filter_operator">filter_operator</a>&nbsp;(variable, operator, operand)</td>
+	<td class="summary">adds operator filter one one variable.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#filter_regexp">filter_regexp</a>&nbsp;(variable, regexp)</td>
+	<td class="summary">adds regular expression filter on one variable.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#lang">lang</a>&nbsp;(variable, tag, exact)</td>
+	<td class="summary">filter variable on specified language tag.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#limit">limit</a>&nbsp;(number)</td>
+	<td class="summary">adds limit clause (maximum number of results to return).</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#new">new</a>&nbsp;()</td>
+	<td class="summary">creates a new Query.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#offset">offset</a>&nbsp;(number)</td>
+	<td class="summary">adds offset clause (ignore first n results).</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#reverse_sort">reverse_sort</a>&nbsp;(...)</td>
+	<td class="summary">adds reverse sorting predicates.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#select">select</a>&nbsp;(..., an)</td>
+	<td class="summary">adds variables to select clause.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#sort">sort</a>&nbsp;(...)</td>
+	<td class="summary">adds sort predicates.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#to_sp">to_sp</a>&nbsp;()</td>
+	<td class="summary">Returns SPARQL serialisation of query.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#where">where</a>&nbsp;(s, p, o, c)</td>
+	<td class="summary">adds where clauses (s,p,o) where each constituent is either variable ('?s') or an RDFS.Resource.</td>
+	</tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="ask"></a><strong>ask</strong>&nbsp;()</dt>
+<dd>
+adds variables to ask clause (see SPARQL specification).
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="clear_select"></a><strong>clear_select</strong>&nbsp;()</dt>
+<dd>
+clears the select clauses.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="count"></a><strong>count</strong>&nbsp;(...)</dt>
+<dd>
+adds variables to count clause.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="distinct"></a><strong>distinct</strong>&nbsp;(...)</dt>
+<dd>
+adds variables to select distinct clause.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>q:distinct('?s', '?p')</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="execute"></a><strong>execute</strong>&nbsp;(options, func)</dt>
+<dd>
+executes query on data sources. Either returns result as a table indexed numerically (flattened into single value unless specified otherwise) or executes a function (number of function parameters should be same as number of select variables)
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  options: e.g 'flatten'
+	</li>
+	
+	<li>
+	  func: a function
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage</h3>
+<ul>
+	
+	<li><code>results = query:execute()</code>
+	
+	<li><code>query:execute ( nil, function(s,p,o) ... end )
+	
+</ul>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="filter"></a><strong>filter</strong>&nbsp;(...)</dt>
+<dd>
+adds one or more generic filters. NOTE: you have to use SPARQL syntax for variables, eg. ('?s', 'abc').
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="filter_operator"></a><strong>filter_operator</strong>&nbsp;(variable, operator, operand)</dt>
+<dd>
+adds operator filter one one variable.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  variable: a string that appears in select/where clause
+	</li>
+	
+	<li>
+	  operator: a SPARQL operator (e.g. '>')
+	</li>
+	
+	<li>
+	  operand: a SPARQL value (e.g. 15)
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="filter_regexp"></a><strong>filter_regexp</strong>&nbsp;(variable, regexp)</dt>
+<dd>
+adds regular expression filter on one variable.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  variable: a string that appears in select/where clause
+	</li>
+	
+	<li>
+	  regexp: a string used as regular expression.
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lang"></a><strong>lang</strong>&nbsp;(variable, tag, exact)</dt>
+<dd>
+filter variable on specified language tag. Optionally matches exactly on language dialect, otherwise only language-specifier is considered.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  variable: a SPARQL variable
+	</li>
+	
+	<li>
+	  tag: a language tag
+	</li>
+	
+	<li>
+	  exact: true or false. If not specified, the default is false.
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>q:lang('?o', 'en')</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="limit"></a><strong>limit</strong>&nbsp;(number)</dt>
+<dd>
+adds limit clause (maximum number of results to return).
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  number: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="new"></a><strong>new</strong>&nbsp;()</dt>
+<dd>
+creates a new Query.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="offset"></a><strong>offset</strong>&nbsp;(number)</dt>
+<dd>
+adds offset clause (ignore first n results).
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  number: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="reverse_sort"></a><strong>reverse_sort</strong>&nbsp;(...)</dt>
+<dd>
+adds reverse sorting predicates.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="select"></a><strong>select</strong>&nbsp;(..., an)</dt>
+<dd>
+adds variables to select clause.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: 
+	</li>
+	
+	<li>
+	  an: arbitrary list of arguments.
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage:</h3>
+<code>q:select('?s', '?p')</code>
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="sort"></a><strong>sort</strong>&nbsp;(...)</dt>
+<dd>
+adds sort predicates.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  ...: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="to_sp"></a><strong>to_sp</strong>&nbsp;()</dt>
+<dd>
+Returns SPARQL serialisation of query.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="where"></a><strong>where</strong>&nbsp;(s, p, o, c)</dt>
+<dd>
+adds where clauses (s,p,o) where each constituent is either variable ('?s') or an RDFS.Resource. Keyword queries are specified with the special '?keyword' string. <br><br><code>Query.new():select('?s'):where('?s', '?keyword', 'eyal')<code>
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  s: subject
+	</li>
+	
+	<li>
+	  p: predicate
+	</li>
+	
+	<li>
+	  o: object
+	</li>
+	
+	<li>
+	  c: context
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

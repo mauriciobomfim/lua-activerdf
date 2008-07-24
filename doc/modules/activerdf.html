@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li><strong>activerdf</strong></li>
+	
+	<li>
+		<a href="../modules/activerdf.ActiveRdfAdapter.html">activerdf.ActiveRdfAdapter</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ConnectionPool.html">activerdf.ConnectionPool</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.FederationManager.html">activerdf.FederationManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Literal.html">activerdf.Literal</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.NTriplesParser.html">activerdf.NTriplesParser</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Namespace.html">activerdf.Namespace</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ObjectManager.html">activerdf.ObjectManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query.html">activerdf.Query</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2Jars2.html">activerdf.Query2Jars2</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2SPARQL.html">activerdf.Query2SPARQL</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.RDFS.Resource.html">activerdf.RDFS.Resource</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.string.html">activerdf.string</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.table.html">activerdf.table</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_rdflite.RDFLite.html">activerdf_rdflite.RDFLite</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_sparql.SparqlAdapter.html">activerdf_sparql.SparqlAdapter</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>activerdf</code></h1>
+
+<p>Lua ActiveRDF is a library for accessing RDF data from Lua programs. In fact, Lua ActiveRDF is a Lua version of ActiveRDF (www.activerdf.org) for Ruby.<br><br> Lua ActiveRDF allows you to rapidly create semantic web applications.<br><br> Lua ActiveRDF gives you a Domain Specific Language (DSL) for your RDF model: you can address RDF resources, classes, properties, etc. programmatically, without queries.<br> <br> Lua ActiveRDF uses the module loop.simple (<a href="http://loop.luaforge.net">http://loop.luaforge.net</a>) to simulate class-based object-oriented programming. The <a href="http://loop.luaforge.net/manual/models.html">API</a> of loop.simple is available as the module <code><b>activerdf.oo</b></code>.<br>  <h2>Simple Example</h2> The following example uses a SPARQL endpoint and displays all people found in the data source: <pre class = 'example'> rdf = require 'activerdf'<br> url = 'http://tecweb08.tecweb.inf.puc-rio.br:8890/sparql'<br> rdf.ConnectionPool.add_data_source { type = 'sparql', engine = 'virtuoso', url = url }<br> <br> foaf = rdf.Namespace.register ( 'test', 'http://activerdf.luaforge.net/test/' )<br> <br> people = foaf.Person:find_all()<br> for _, person in ipairs(people) do<br> &#09;print(person.name)<br> end </pre> <p> Lua ActiveRDF is distributed as a Lua module.<br> <br> Lua ActiveRDF is free software and uses the same license as Lua 5.1.<br> <br> Current version is 0.1. It was developed for Lua 5.1. <a href="http://luaforge.net/frs/?group_id=370">Download</a> <br><br> Website: <a href="http://activerdf.luaforge.net">http://activerdf.luaforge.net</a><br></p>
+
+
+
+<p><small><b>Release:</b> $Id$ </p> </small></p>
+
+
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

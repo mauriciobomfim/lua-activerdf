@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/activerdf.html">activerdf</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ActiveRdfAdapter.html">activerdf.ActiveRdfAdapter</a>
+	</li>
+
+	<li><strong>activerdf.ConnectionPool</strong></li>
+	
+	<li>
+		<a href="../modules/activerdf.FederationManager.html">activerdf.FederationManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Literal.html">activerdf.Literal</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.NTriplesParser.html">activerdf.NTriplesParser</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Namespace.html">activerdf.Namespace</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ObjectManager.html">activerdf.ObjectManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query.html">activerdf.Query</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2Jars2.html">activerdf.Query2Jars2</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2SPARQL.html">activerdf.Query2SPARQL</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.RDFS.Resource.html">activerdf.RDFS.Resource</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.string.html">activerdf.string</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.table.html">activerdf.table</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_rdflite.RDFLite.html">activerdf_rdflite.RDFLite</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_sparql.SparqlAdapter.html">activerdf_sparql.SparqlAdapter</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>activerdf.ConnectionPool</code></h1>
+
+<p>Maintains pool of adapter instances that are connected to datasources. Returns right adapter for a given datasource, by either reusing an existing adapter-instance or creating new a adapter-instance. </p>
+
+
+
+<p><small><b>Release:</b> $Id$ </small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#adapter_types">adapter_types</a>&nbsp;()</td>
+	<td class="summary">returns the set of currently registered datasources types </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#adapters">adapters</a>&nbsp;()</td>
+	<td class="summary">returns the set of currently registered datasources </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#add_data_source">add_data_source</a>&nbsp;(connection_params)</td>
+	<td class="summary">returns adapter-instance for given parameters (either existing or new) </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#clear">clear</a>&nbsp;()</td>
+	<td class="summary">clears the pool: removes all registered data sources </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#flush">flush</a>&nbsp;()</td>
+	<td class="summary">flushes all openstanding changes into the original datasource.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#read_adapters">read_adapters</a>&nbsp;()</td>
+	<td class="summary">returns the set of currently registered read-access datasources </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#register_adapter">register_adapter</a>&nbsp;(type, klass)</td>
+	<td class="summary">adapter-types can register themselves with connection pool by indicating which adapter-type they are </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#remove_data_source">remove_data_source</a>&nbsp;(adapter)</td>
+	<td class="summary">remove one adapter from activerdf </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#set_data_source">set_data_source</a>&nbsp;(adapter, connection_params)</td>
+	<td class="summary">sets adapter-instance for connection parameters (if you want to re-enable an existing adapter) </td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#write_adapters">write_adapters</a>&nbsp;()</td>
+	<td class="summary">returns the set of currently registered write-access datasources </td>
+	</tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="adapter_types"></a><strong>adapter_types</strong>&nbsp;()</dt>
+<dd>
+returns the set of currently registered datasources types
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="adapters"></a><strong>adapters</strong>&nbsp;()</dt>
+<dd>
+returns the set of currently registered datasources
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="add_data_source"></a><strong>add_data_source</strong>&nbsp;(connection_params)</dt>
+<dd>
+returns adapter-instance for given parameters (either existing or new)
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  connection_params: a table with at least the field type for the type of datasource. Others fields depends on datasource.
+	</li>
+	
+</ul>
+
+
+
+
+<h3>Usage</h3>
+<ul>
+	
+	<li>for sparql: <code>ConnectionPool.add_data_source{ type = 'sparql', url = 'http://www.example.org/sparql' }</code>
+	
+	<li>for rdflite: <code>ConnectionPool.add_data_source{ type = 'rdflite', url = '/path/to/database.db' }</code>
+	
+</ul>
+
+
+
+<h3>Return value:</h3>
+adapter-instance for given parameters
+
+
+
+</dd>
+
+
+
+
+<dt><a name="clear"></a><strong>clear</strong>&nbsp;()</dt>
+<dd>
+clears the pool: removes all registered data sources
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="flush"></a><strong>flush</strong>&nbsp;()</dt>
+<dd>
+flushes all openstanding changes into the original datasource.
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="read_adapters"></a><strong>read_adapters</strong>&nbsp;()</dt>
+<dd>
+returns the set of currently registered read-access datasources
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="register_adapter"></a><strong>register_adapter</strong>&nbsp;(type, klass)</dt>
+<dd>
+adapter-types can register themselves with connection pool by indicating which adapter-type they are
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  type: a string for adapter type e.g 'rdflite'
+	</li>
+	
+	<li>
+	  klass: a class for an adapter
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="remove_data_source"></a><strong>remove_data_source</strong>&nbsp;(adapter)</dt>
+<dd>
+remove one adapter from activerdf
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  adapter: an instance of a datasource to be removed
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="set_data_source"></a><strong>set_data_source</strong>&nbsp;(adapter, connection_params)</dt>
+<dd>
+sets adapter-instance for connection parameters (if you want to re-enable an existing adapter)
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  adapter: an adapter-instance
+	</li>
+	
+	<li>
+	  connection_params: new connection parameters for adapter
+	</li>
+	
+</ul>
+
+
+
+
+
+
+<h3>Return value:</h3>
+the same adapter
+
+
+
+</dd>
+
+
+
+
+<dt><a name="write_adapters"></a><strong>write_adapters</strong>&nbsp;()</dt>
+<dd>
+returns the set of currently registered write-access datasources
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../luadoc.css" type="text/css" />
+	<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/-->
+</head>
+
+<body>
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+
+
+<h1>LuaDoc</h1>
+<ul>
+	
+	<li><a href="../index.html">Index</a></li>
+	
+</ul>
+
+
+<!-- Module list -->
+
+<h1>Modules</h1>
+<ul>
+
+	<li>
+		<a href="../modules/activerdf.html">activerdf</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ActiveRdfAdapter.html">activerdf.ActiveRdfAdapter</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.ConnectionPool.html">activerdf.ConnectionPool</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.FederationManager.html">activerdf.FederationManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Literal.html">activerdf.Literal</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.NTriplesParser.html">activerdf.NTriplesParser</a>
+	</li>
+
+	<li><strong>activerdf.Namespace</strong></li>
+	
+	<li>
+		<a href="../modules/activerdf.ObjectManager.html">activerdf.ObjectManager</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query.html">activerdf.Query</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2Jars2.html">activerdf.Query2Jars2</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.Query2SPARQL.html">activerdf.Query2SPARQL</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.RDFS.Resource.html">activerdf.RDFS.Resource</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.string.html">activerdf.string</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf.table.html">activerdf.table</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_rdflite.RDFLite.html">activerdf_rdflite.RDFLite</a>
+	</li>
+
+	<li>
+		<a href="../modules/activerdf_sparql.SparqlAdapter.html">activerdf_sparql.SparqlAdapter</a>
+	</li>
+
+</ul>
+
+
+
+<!-- File list -->
+
+
+
+
+
+
+</div><!-- id="navigation" -->
+
+<div id="content">
+
+<h1>Module <code>activerdf.Namespace</code></h1>
+
+<p>Manages namespace abbreviations and expansions.</p>
+
+
+
+<p><small><b>Release:</b> $Id$ </small></p>
+
+
+
+<h2>Functions</h2>
+<table class="function_list">
+
+	<tr>
+	<td class="name" nowrap><a href="#abbreviations">abbreviations</a>&nbsp;()</td>
+	<td class="summary">returns currently registered namespace abbreviations (e.g 'foaf', 'rdf').</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#expand">expand</a>&nbsp;(prefix, localname)</td>
+	<td class="summary">returns URI (string) formed by concatenation of prefix and localname.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#localname">localname</a>&nbsp;(resource)</td>
+	<td class="summary">returns local-part of URI.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#lookup">lookup</a>&nbsp;(prefix, localname)</td>
+	<td class="summary">returns a resource whose URI is formed by concatenation of prefix and localname.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#prefix">prefix</a>&nbsp;(resource)</td>
+	<td class="summary">returns prefix (if known) for the non-local part of the URI, or nil if prefix not registered.</td>
+	</tr>
+
+	<tr>
+	<td class="name" nowrap><a href="#register">register</a>&nbsp;(prefix, fullURI)</td>
+	<td class="summary">registers a namespace prefix and its associated expansion (full URI).</td>
+	</tr>
+
+</table>
+
+
+
+
+
+
+<br/>
+<br/>
+
+
+
+<h2><a name="functions"></a>Functions</h2>
+<dl class="function">
+
+
+
+<dt><a name="abbreviations"></a><strong>abbreviations</strong>&nbsp;()</dt>
+<dd>
+returns currently registered namespace abbreviations (e.g 'foaf', 'rdf').
+
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="expand"></a><strong>expand</strong>&nbsp;(prefix, localname)</dt>
+<dd>
+returns URI (string) formed by concatenation of prefix and localname.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  prefix: 
+	</li>
+	
+	<li>
+	  localname: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="localname"></a><strong>localname</strong>&nbsp;(resource)</dt>
+<dd>
+returns local-part of URI.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  resource: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="lookup"></a><strong>lookup</strong>&nbsp;(prefix, localname)</dt>
+<dd>
+returns a resource whose URI is formed by concatenation of prefix and localname.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  prefix: 
+	</li>
+	
+	<li>
+	  localname: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="prefix"></a><strong>prefix</strong>&nbsp;(resource)</dt>
+<dd>
+returns prefix (if known) for the non-local part of the URI, or nil if prefix not registered.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  resource: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+
+
+<dt><a name="register"></a><strong>register</strong>&nbsp;(prefix, fullURI)</dt>
+<dd>
+registers a namespace prefix and its associated expansion (full URI). e.g. 'rdf' and 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'.
+
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  prefix: 
+	</li>
+	
+	<li>
+	  fullURI: 
+	</li>
+	
+</ul>
+
+
+
+
+
+
+
+
+</dd>
+
+
+</dl>
+
+
+
+
+
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+	<p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->	
+</body>
+</html>
