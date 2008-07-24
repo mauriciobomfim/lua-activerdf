@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 --]]
 
-module("activerdf_sparql.SparqlAdapter.lpegxml",package.seeall)
+module("activerdf_sparql.lpegxml",package.seeall)
 local DEBUG=false
 
 function parse(xmlstr)
@@ -140,7 +140,7 @@ function parse(xmlstr)
 end
 	
 	
----[==[
+--[==[
 --[[	Test	--]]
 
 local xmltbl=assert(parse([=[

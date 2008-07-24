@@ -1,10 +1,10 @@
 -- -------------------------------------------------------------------
--- Lua RDFLite is a small RDF datastore, based on sqlite3. 
+--- Lua RDFLite is a small RDF datastore, based on sqlite3. 
 -- Its a Lua version of rdflite for ruby. 
 -- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
 -- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
 -- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
--- arbitrary joins in the where clauses). Unlike ruby rdflite Lua RDFLite does not offers 
+-- arbitrary joins in the where clauses). Unlike ruby RDFLite Lua RDFLite does not offers 
 -- full-text search over the literals yet. 
 -- LUADOC COMMENTS ARE AT END OF THIS FILE
 -- -------------------------------------------------------------------
@@ -99,7 +99,6 @@ ConnectionPool.register_adapter('rdflite', RDFLite)
 -- bool_accessor :keyword_search, :reasoning
 
 --- instantiates RDFLite database.
--- available parameters:
 -- @name new
 -- @param params a table with the following fields: <br>
 -- location = filepath (defaults to memory)<br>
@@ -166,9 +165,9 @@ function RDFLite:__init(params)
 	return obj
 end
 
---- returns the number of triples in the datastore (incl. possible duplicates).
+--- returns the number of triples in the datastore. (incl. possible duplicates).
 -- @name size
--- @usage <code>db:size()</code>
+-- @usage <code>db:size()</code> 
 function RDFLite:size()
 	local cur = self.db:execute('select count(*) from triple')
 	local result = tonumber(cur:fetch())
@@ -787,7 +786,7 @@ end
 -- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
 -- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
 -- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
--- arbitrary joins in the where clauses). Unlike ruby rdflite Lua RDFLite does not offers 
+-- arbitrary joins in the where clauses). Unlike ruby RDFLite, Lua RDFLite does not offers 
 -- full-text search over the literals yet. 
 -- @release $Id$
 ---------------------------------------------------------------------

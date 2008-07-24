@@ -9,19 +9,18 @@ address RDF resources, classes, properties, etc. programmatically, without queri
 
 Simple Example
 --------------
-The following example uses a SPARQL endpoint with FOAF data and displays all 
+The following example uses a SPARQL endpoint and displays all 
 people found in the data source:
 
-	require 'activerdf'
-	local cp = activerdf.ConnectionPool
-	cp.add_data_source { type = 'sparql', engine = 'virtuoso', url = '...' }
+	rdf = require 'activerdf'
+	url = 'http://tecweb08.tecweb.inf.puc-rio.br:8890/sparql'
+	rdf.ConnectionPool.add_data_source { type = 'sparql', engine = 'virtuoso', url = url }
 	
-	local ns = activerdf.Namespace
-	local foaf = ns.register ( 'foaf', 'http://xmlns.com/foaf/0.1/' )
+	foaf = rdf.Namespace.register ( 'test', 'http://activerdf.luaforge.net/test/' )
 	
-	local people = foaf.Person:find_all()
+	people = foaf.Person:find_all()
 	for _, person in ipairs(people) do
-		print(person.nick)
+		print(person.name)
 	end
 
 Lua ActiveRDF is distributed as a Lua module.

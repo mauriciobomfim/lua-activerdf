@@ -21,7 +21,7 @@ http://luaforge.net/frs/?group_id=370
 Dependencies
 
 Lua RDFLite adapter depends on four modules:
-	* Lua ActiveRDF 0.1	
+	* Lua ActiveRDF 0.1
 	* LuaSQL 2.1.0 (sqlite3 driver)
 	* uri 1.0 (http://luaforge.net/projects/uri)
 	* LPeg 0.8 (re module)
