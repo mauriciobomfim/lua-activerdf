@@ -113,7 +113,7 @@
 
 <h1>Module <code>activerdf.Query</code></h1>
 
-<p>Represents a query on a datasource, abstract representation of SPARQL features. Query is passed to federation manager or adapter for execution on data source. <br>In all clauses, strings starting with ? represent variables: <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.</p>
+<p>Represents a query on a datasource, abstract representation of SPARQL features. Query is passed to federation manager or adapter for execution on data source. <br><br>Query is a class (simulated by <a href="http://loop.luaforge.net" target="_blank">LOOP</a>). Every function that have the parameter <em>self</em>, is a function of instance of the class Query. So it can be called using <code>obj:func()</code> or <code>Query.func(obj)</code>.<br> <br>In all clauses, strings starting with ? represent variables: <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.</p>
 
 
 
@@ -125,52 +125,52 @@
 <table class="function_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#ask">ask</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#ask">ask</a>&nbsp;(self)</td>
 	<td class="summary">adds variables to ask clause (see SPARQL specification).</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#clear_select">clear_select</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#clear_select">clear_select</a>&nbsp;(self)</td>
 	<td class="summary">clears the select clauses.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#count">count</a>&nbsp;(...)</td>
+	<td class="name" nowrap><a href="#count">count</a>&nbsp;(self, ...)</td>
 	<td class="summary">adds variables to count clause.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#distinct">distinct</a>&nbsp;(...)</td>
+	<td class="name" nowrap><a href="#distinct">distinct</a>&nbsp;(self, ...)</td>
 	<td class="summary">adds variables to select distinct clause.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#execute">execute</a>&nbsp;(options, func)</td>
+	<td class="name" nowrap><a href="#execute">execute</a>&nbsp;(self, options, func)</td>
 	<td class="summary">executes query on data sources.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#filter">filter</a>&nbsp;(...)</td>
+	<td class="name" nowrap><a href="#filter">filter</a>&nbsp;(self, ...)</td>
 	<td class="summary">adds one or more generic filters.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#filter_operator">filter_operator</a>&nbsp;(variable, operator, operand)</td>
+	<td class="name" nowrap><a href="#filter_operator">filter_operator</a>&nbsp;(self, variable, operator, operand)</td>
 	<td class="summary">adds operator filter one one variable.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#filter_regexp">filter_regexp</a>&nbsp;(variable, regexp)</td>
+	<td class="name" nowrap><a href="#filter_regexp">filter_regexp</a>&nbsp;(self, variable, regexp)</td>
 	<td class="summary">adds regular expression filter on one variable.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#lang">lang</a>&nbsp;(variable, tag, exact)</td>
+	<td class="name" nowrap><a href="#lang">lang</a>&nbsp;(self, variable, tag, exact)</td>
 	<td class="summary">filter variable on specified language tag.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#limit">limit</a>&nbsp;(number)</td>
+	<td class="name" nowrap><a href="#limit">limit</a>&nbsp;(self, number)</td>
 	<td class="summary">adds limit clause (maximum number of results to return).</td>
 	</tr>
 
@@ -180,32 +180,32 @@
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#offset">offset</a>&nbsp;(number)</td>
+	<td class="name" nowrap><a href="#offset">offset</a>&nbsp;(self, number)</td>
 	<td class="summary">adds offset clause (ignore first n results).</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#reverse_sort">reverse_sort</a>&nbsp;(...)</td>
+	<td class="name" nowrap><a href="#reverse_sort">reverse_sort</a>&nbsp;(self, ...)</td>
 	<td class="summary">adds reverse sorting predicates.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#select">select</a>&nbsp;(..., an)</td>
+	<td class="name" nowrap><a href="#select">select</a>&nbsp;(self, ..., an)</td>
 	<td class="summary">adds variables to select clause.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#sort">sort</a>&nbsp;(...)</td>
+	<td class="name" nowrap><a href="#sort">sort</a>&nbsp;(self, ...)</td>
 	<td class="summary">adds sort predicates.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#to_sp">to_sp</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#to_sp">to_sp</a>&nbsp;(self)</td>
 	<td class="summary">Returns SPARQL serialisation of query.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#where">where</a>&nbsp;(s, p, o, c)</td>
+	<td class="name" nowrap><a href="#where">where</a>&nbsp;(self, s, p, o, c)</td>
 	<td class="summary">adds where clauses (s,p,o) where each constituent is either variable ('?s') or an RDFS.Resource.</td>
 	</tr>
 
@@ -226,11 +226,20 @@
 
 
 
-<dt><a name="ask"></a><strong>ask</strong>&nbsp;()</dt>
+<dt><a name="ask"></a><strong>ask</strong>&nbsp;(self)</dt>
 <dd>
 adds variables to ask clause (see SPARQL specification).
 
 
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
+
 
 
 
@@ -243,11 +252,20 @@ adds variables to ask clause (see SPARQL specification).
 
 
 
-<dt><a name="clear_select"></a><strong>clear_select</strong>&nbsp;()</dt>
+<dt><a name="clear_select"></a><strong>clear_select</strong>&nbsp;(self)</dt>
 <dd>
 clears the select clauses.
 
 
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
+
 
 
 
@@ -260,13 +278,17 @@ clears the select clauses.
 
 
 
-<dt><a name="count"></a><strong>count</strong>&nbsp;(...)</dt>
+<dt><a name="count"></a><strong>count</strong>&nbsp;(self, ...)</dt>
 <dd>
 adds variables to count clause.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ...: 
@@ -286,13 +308,17 @@ adds variables to count clause.
 
 
 
-<dt><a name="distinct"></a><strong>distinct</strong>&nbsp;(...)</dt>
+<dt><a name="distinct"></a><strong>distinct</strong>&nbsp;(self, ...)</dt>
 <dd>
 adds variables to select distinct clause.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ...: 
@@ -315,13 +341,17 @@ adds variables to select distinct clause.
 
 
 
-<dt><a name="execute"></a><strong>execute</strong>&nbsp;(options, func)</dt>
+<dt><a name="execute"></a><strong>execute</strong>&nbsp;(self, options, func)</dt>
 <dd>
 executes query on data sources. Either returns result as a table indexed numerically (flattened into single value unless specified otherwise) or executes a function (number of function parameters should be same as number of select variables)
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  options: e.g 'flatten'
@@ -341,7 +371,7 @@ executes query on data sources. Either returns result as a table indexed numeric
 	
 	<li><code>results = query:execute()</code>
 	
-	<li><code>query:execute ( nil, function(s,p,o) ... end )
+	<li><code>query:execute ( nil, function(s,p,o) ... end )</code>
 	
 </ul>
 
@@ -354,13 +384,17 @@ executes query on data sources. Either returns result as a table indexed numeric
 
 
 
-<dt><a name="filter"></a><strong>filter</strong>&nbsp;(...)</dt>
+<dt><a name="filter"></a><strong>filter</strong>&nbsp;(self, ...)</dt>
 <dd>
 adds one or more generic filters. NOTE: you have to use SPARQL syntax for variables, eg. ('?s', 'abc').
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ...: 
@@ -380,13 +414,17 @@ adds one or more generic filters. NOTE: you have to use SPARQL syntax for variab
 
 
 
-<dt><a name="filter_operator"></a><strong>filter_operator</strong>&nbsp;(variable, operator, operand)</dt>
+<dt><a name="filter_operator"></a><strong>filter_operator</strong>&nbsp;(self, variable, operator, operand)</dt>
 <dd>
 adds operator filter one one variable.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  variable: a string that appears in select/where clause
@@ -414,13 +452,17 @@ adds operator filter one one variable.
 
 
 
-<dt><a name="filter_regexp"></a><strong>filter_regexp</strong>&nbsp;(variable, regexp)</dt>
+<dt><a name="filter_regexp"></a><strong>filter_regexp</strong>&nbsp;(self, variable, regexp)</dt>
 <dd>
 adds regular expression filter on one variable.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  variable: a string that appears in select/where clause
@@ -444,13 +486,17 @@ adds regular expression filter on one variable.
 
 
 
-<dt><a name="lang"></a><strong>lang</strong>&nbsp;(variable, tag, exact)</dt>
+<dt><a name="lang"></a><strong>lang</strong>&nbsp;(self, variable, tag, exact)</dt>
 <dd>
 filter variable on specified language tag. Optionally matches exactly on language dialect, otherwise only language-specifier is considered.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  variable: a SPARQL variable
@@ -481,13 +527,17 @@ filter variable on specified language tag. Optionally matches exactly on languag
 
 
 
-<dt><a name="limit"></a><strong>limit</strong>&nbsp;(number)</dt>
+<dt><a name="limit"></a><strong>limit</strong>&nbsp;(self, number)</dt>
 <dd>
 adds limit clause (maximum number of results to return).
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  number: 
@@ -524,13 +574,17 @@ creates a new Query.
 
 
 
-<dt><a name="offset"></a><strong>offset</strong>&nbsp;(number)</dt>
+<dt><a name="offset"></a><strong>offset</strong>&nbsp;(self, number)</dt>
 <dd>
 adds offset clause (ignore first n results).
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  number: 
@@ -550,13 +604,17 @@ adds offset clause (ignore first n results).
 
 
 
-<dt><a name="reverse_sort"></a><strong>reverse_sort</strong>&nbsp;(...)</dt>
+<dt><a name="reverse_sort"></a><strong>reverse_sort</strong>&nbsp;(self, ...)</dt>
 <dd>
 adds reverse sorting predicates.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ...: 
@@ -576,13 +634,17 @@ adds reverse sorting predicates.
 
 
 
-<dt><a name="select"></a><strong>select</strong>&nbsp;(..., an)</dt>
+<dt><a name="select"></a><strong>select</strong>&nbsp;(self, ..., an)</dt>
 <dd>
 adds variables to select clause.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ...: 
@@ -609,13 +671,17 @@ adds variables to select clause.
 
 
 
-<dt><a name="sort"></a><strong>sort</strong>&nbsp;(...)</dt>
+<dt><a name="sort"></a><strong>sort</strong>&nbsp;(self, ...)</dt>
 <dd>
 adds sort predicates.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ...: 
@@ -635,10 +701,19 @@ adds sort predicates.
 
 
 
-<dt><a name="to_sp"></a><strong>to_sp</strong>&nbsp;()</dt>
+<dt><a name="to_sp"></a><strong>to_sp</strong>&nbsp;(self)</dt>
 <dd>
 Returns SPARQL serialisation of query.
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -652,13 +727,17 @@ Returns SPARQL serialisation of query.
 
 
 
-<dt><a name="where"></a><strong>where</strong>&nbsp;(s, p, o, c)</dt>
+<dt><a name="where"></a><strong>where</strong>&nbsp;(self, s, p, o, c)</dt>
 <dd>
 adds where clauses (s,p,o) where each constituent is either variable ('?s') or an RDFS.Resource. Keyword queries are specified with the special '?keyword' string. <br><br><code>Query.new():select('?s'):where('?s', '?keyword', 'eyal')<code>
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  s: subject

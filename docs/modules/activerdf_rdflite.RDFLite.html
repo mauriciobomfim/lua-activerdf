@@ -113,7 +113,7 @@
 
 <h1>Module <code>activerdf_rdflite.RDFLite</code></h1>
 
-<p>Lua RDFLite is a small RDF datastore, based on sqlite3. Its a Lua version of rdflite for ruby. It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. Lua RDFLite does not scale well for large datasets, but is very fast for small ones. It supports the full ActiveRDF query grammar (basically, select/distinct/count with arbitrary joins in the where clauses). Unlike ruby RDFLite, Lua RDFLite does not offers full-text search over the literals yet.</p>
+<p>Lua RDFLite is a small RDF datastore, based on sqlite3. Its a Lua version of rdflite for ruby. It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. Lua RDFLite does not scale well for large datasets, but is very fast for small ones. It supports the full ActiveRDF query grammar (basically, select/distinct/count with arbitrary joins in the where clauses). Unlike ruby RDFLite, Lua RDFLite does not offers full-text search over the literals yet. <br><br>RDFLite is a class (simulated by <a href="http://loop.luaforge.net" target="_blank">LOOP</a>). Every function that have the parameter <em>self</em>, is a function of instance of the class RDFLite. So it can be called using <code>obj:func()</code> or <code>RDFLite.func(obj)</code>.<br></p>
 
 
 
@@ -125,42 +125,42 @@
 <table class="function_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#add">add</a>&nbsp;(s, p, o, c)</td>
+	<td class="name" nowrap><a href="#add">add</a>&nbsp;(self, s, p, o, c)</td>
 	<td class="summary">adds triple(s,p,o) to datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#add_ntriples">add_ntriples</a>&nbsp;(ntriples, context)</td>
+	<td class="name" nowrap><a href="#add_ntriples">add_ntriples</a>&nbsp;(self, ntriples, context)</td>
 	<td class="summary">adds ntriples from given context into datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#clear">clear</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#clear">clear</a>&nbsp;(self)</td>
 	<td class="summary">deletes all triples from datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#close">close</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#close">close</a>&nbsp;(self)</td>
 	<td class="summary">close adapter and remove it from the ConnectionPool.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#delete">delete</a>&nbsp;(s, p, o, c)</td>
+	<td class="name" nowrap><a href="#delete">delete</a>&nbsp;(self, s, p, o, c)</td>
 	<td class="summary">deletes triple(s,p,o,c) from datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#dump">dump</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#dump">dump</a>&nbsp;(self)</td>
 	<td class="summary">returns all triples in the datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#flush">flush</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#flush">flush</a>&nbsp;(self)</td>
 	<td class="summary">flushes openstanding changes to underlying sqlite3.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#load">load</a>&nbsp;(location)</td>
+	<td class="name" nowrap><a href="#load">load</a>&nbsp;(self, location)</td>
 	<td class="summary">loads triples from file in ntriples format.</td>
 	</tr>
 
@@ -170,17 +170,17 @@
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#query">query</a>&nbsp;(query)</td>
+	<td class="name" nowrap><a href="#query">query</a>&nbsp;(self, query)</td>
 	<td class="summary">executes ActiveRDF query on datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#size">size</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#size">size</a>&nbsp;(self)</td>
 	<td class="summary">returns the number of triples in the datastore.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#translate">translate</a>&nbsp;(query)</td>
+	<td class="name" nowrap><a href="#translate">translate</a>&nbsp;(self, query)</td>
 	<td class="summary">translates ActiveRDF query into internal sqlite query string.</td>
 	</tr>
 
@@ -201,13 +201,17 @@
 
 
 
-<dt><a name="add"></a><strong>add</strong>&nbsp;(s, p, o, c)</dt>
+<dt><a name="add"></a><strong>add</strong>&nbsp;(self, s, p, o, c)</dt>
 <dd>
 adds triple(s,p,o) to datastore. s,p must be resources (instance of RDFS.Resource), o can be primitive data or resource.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  s: subject
@@ -242,13 +246,17 @@ adds triple(s,p,o) to datastore. s,p must be resources (instance of RDFS.Resourc
 
 
 
-<dt><a name="add_ntriples"></a><strong>add_ntriples</strong>&nbsp;(ntriples, context)</dt>
+<dt><a name="add_ntriples"></a><strong>add_ntriples</strong>&nbsp;(self, ntriples, context)</dt>
 <dd>
 adds ntriples from given context into datastore.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  ntriples: a string of ntriples
@@ -275,10 +283,19 @@ adds ntriples from given context into datastore.
 
 
 
-<dt><a name="clear"></a><strong>clear</strong>&nbsp;()</dt>
+<dt><a name="clear"></a><strong>clear</strong>&nbsp;(self)</dt>
 <dd>
 deletes all triples from datastore.
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -295,10 +312,19 @@ deletes all triples from datastore.
 
 
 
-<dt><a name="close"></a><strong>close</strong>&nbsp;()</dt>
+<dt><a name="close"></a><strong>close</strong>&nbsp;(self)</dt>
 <dd>
 close adapter and remove it from the ConnectionPool.
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -315,13 +341,17 @@ close adapter and remove it from the ConnectionPool.
 
 
 
-<dt><a name="delete"></a><strong>delete</strong>&nbsp;(s, p, o, c)</dt>
+<dt><a name="delete"></a><strong>delete</strong>&nbsp;(self, s, p, o, c)</dt>
 <dd>
 deletes triple(s,p,o,c) from datastore.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  s: subject
@@ -356,10 +386,19 @@ Strings starting with ? parameters match anything: <code>db:delete('?s','?p','?o
 
 
 
-<dt><a name="dump"></a><strong>dump</strong>&nbsp;()</dt>
+<dt><a name="dump"></a><strong>dump</strong>&nbsp;(self)</dt>
 <dd>
 returns all triples in the datastore.
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -376,10 +415,19 @@ returns all triples in the datastore.
 
 
 
-<dt><a name="flush"></a><strong>flush</strong>&nbsp;()</dt>
+<dt><a name="flush"></a><strong>flush</strong>&nbsp;(self)</dt>
 <dd>
 flushes openstanding changes to underlying sqlite3.
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -396,13 +444,17 @@ flushes openstanding changes to underlying sqlite3.
 
 
 
-<dt><a name="load"></a><strong>load</strong>&nbsp;(location)</dt>
+<dt><a name="load"></a><strong>load</strong>&nbsp;(self, location)</dt>
 <dd>
 loads triples from file in ntriples format.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  location: path to file
@@ -454,13 +506,17 @@ instantiates RDFLite database.
 
 
 
-<dt><a name="query"></a><strong>query</strong>&nbsp;(query)</dt>
+<dt><a name="query"></a><strong>query</strong>&nbsp;(self, query)</dt>
 <dd>
 executes ActiveRDF query on datastore.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  query: 
@@ -483,10 +539,19 @@ executes ActiveRDF query on datastore.
 
 
 
-<dt><a name="size"></a><strong>size</strong>&nbsp;()</dt>
+<dt><a name="size"></a><strong>size</strong>&nbsp;(self)</dt>
 <dd>
 returns the number of triples in the datastore. (incl. possible duplicates).
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -503,13 +568,17 @@ returns the number of triples in the datastore. (incl. possible duplicates).
 
 
 
-<dt><a name="translate"></a><strong>translate</strong>&nbsp;(query)</dt>
+<dt><a name="translate"></a><strong>translate</strong>&nbsp;(self, query)</dt>
 <dd>
 translates ActiveRDF query into internal sqlite query string.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  query: 

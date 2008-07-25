@@ -1,14 +1,3 @@
--- -------------------------------------------------------------------
---- Lua RDFLite is a small RDF datastore, based on sqlite3. 
--- Its a Lua version of rdflite for ruby. 
--- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
--- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
--- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
--- arbitrary joins in the where clauses). Unlike ruby RDFLite Lua RDFLite does not offers 
--- full-text search over the literals yet. 
--- LUADOC COMMENTS ARE AT END OF THIS FILE
--- -------------------------------------------------------------------
-local module = module
 require 'activerdf'
 require 'activerdf.queryengine.ntriples_parser'
 
@@ -36,7 +25,8 @@ local tonumber = tonumber
 local math = math
 local next = next
 local ipairs = ipairs
-
+local require = require
+local select = select
 --$activerdflog.info "loading RDFLite adapter"
 
 --begin 
@@ -48,53 +38,22 @@ local ipairs = ipairs
 --	@@have_ferret = false
 --end
 
-local Resource = re.compile ( [[ '<' { [^>]* } '>' ]] )
-local Literal = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ]]  )
-local SPOC = {'s','p','o','c'}
+---------------------------------------------------------------------
+--- Lua RDFLite is a small RDF datastore, based on sqlite3. 
+-- Its a Lua version of rdflite for ruby. 
+-- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
+-- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
+-- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
+-- arbitrary joins in the where clauses). Unlike ruby RDFLite, Lua RDFLite does not offers 
+-- full-text search over the literals yet. 
+-- <br><br>RDFLite is a class (simulated by <a href="http://loop.luaforge.net" target="_blank">LOOP</a>). Every function that have the parameter <em>self</em>, 
+-- is a function of instance of the class RDFLite. So it can be called using <code>obj:func()</code> or <code>RDFLite.func(obj)</code>.<br>
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf_rdflite.RDFLite'
+oo.class(_M, require('activerdf.ActiveRdfAdapter'))
 
-
-local spoc_index = function(index)	
-	return math.fmod ( index - 1, 4 ) + 1
-end
-
-local alias_number = function(index)	
-	return math.floor ( ( index - 1 ) / 4 )
-end
-
--- Prepares a SQL statement using placeholders.
--- Extracted from http://sputnik.freewisdom.org
-local function prepare(statement, ...)
-	local count = select('#', ...)
-
-	if count > 0 then
-		local someBindings = {}
-
-		for index = 1, count do
-			local value = select(index, ...)
-			local type = type(value)
-
-			if type == 'string' then
-				value = '\'' .. value:gsub('\'', '\'\'') .. '\''
-			elseif type == 'nil' then
-				value = 'null'
-			else
-				value = tostring(value)
-			end
-
-			someBindings[index] = value
-		end
-		
-		statement = statement:format(unpack(someBindings))
-	end
-
-	return statement
-end
-
-module "activerdf_rdflite"
-
-RDFLite = oo.class({}, ActiveRdfAdapter)
-
-ConnectionPool.register_adapter('rdflite', RDFLite)
+ConnectionPool.register_adapter('rdflite', _M)
 
 -- bool_accessor :keyword_search, :reasoning
 
@@ -105,11 +64,11 @@ ConnectionPool.register_adapter('rdflite', RDFLite)
 -- keyword = true/false (defaults to false)<br>
 -- pidx, oidx, etc. = true/false (enable/disable these indices)<br>
 -- @usage <code>db = RDFLite.new { location = '/path/to/file.db' }</code>
-function RDFLite.new(params)
-	return RDFLite(params)
+function new(params)
+	return _M(params)
 end
 
-function RDFLite:__init(params)
+function __init(self, params)
 	local params = params or {}
 	
 	--$activerdflog.info "initialised rdflite with params #{params.to_s}"
@@ -165,10 +124,51 @@ function RDFLite:__init(params)
 	return obj
 end
 
+local Resource = re.compile ( [[ '<' { [^>]* } '>' ]] )
+local Literal = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ]]  )
+local SPOC = {'s','p','o','c'}
+
+local spoc_index = function(index)	
+	return math.fmod ( index - 1, 4 ) + 1
+end
+
+local alias_number = function(index)	
+	return math.floor ( ( index - 1 ) / 4 )
+end
+
+-- Prepares a SQL statement using placeholders.
+-- Extracted from http://sputnik.freewisdom.org
+local function prepare(statement, ...)
+	local count = select('#', ...)
+
+	if count > 0 then
+		local someBindings = {}
+
+		for index = 1, count do
+			local value = select(index, ...)
+			local type = type(value)
+
+			if type == 'string' then
+				value = '\'' .. value:gsub('\'', '\'\'') .. '\''
+			elseif type == 'nil' then
+				value = 'null'
+			else
+				value = tostring(value)
+			end
+
+			someBindings[index] = value
+		end
+		
+		statement = statement:format(unpack(someBindings))
+	end
+
+	return statement
+end
+
 --- returns the number of triples in the datastore. (incl. possible duplicates).
 -- @name size
 -- @usage <code>db:size()</code> 
-function RDFLite:size()
+function size(self)
 	local cur = self.db:execute('select count(*) from triple')
 	local result = tonumber(cur:fetch())
 	cur:close()
@@ -178,7 +178,7 @@ end
 --- returns all triples in the datastore.
 -- @name dump
 -- @usage <code>db:dump()</code>
-function RDFLite:dump()
+function dump(self)
 	local row = {}
 	local result = {}
 	local cur = self.db:execute('select s,p,o,c from triple')
@@ -196,14 +196,14 @@ end
 --- deletes all triples from datastore.
 -- @name clear
 -- @usage <code>db:clear()</code>
-function RDFLite:clear()
+function clear(self)
 	self.db:execute('delete from triple')
 end
 
 --- close adapter and remove it from the ConnectionPool.
 -- @name close
 -- @usage <code>db:close()</code>
-function RDFLite:close()
+function close(self)
 	ConnectionPool.remove_data_source(self)
 	self.db:close()
 end
@@ -217,7 +217,7 @@ end
 -- @usage Strings starting with ? parameters match anything: <code>db:delete('?s','?p','?o')</code> will delete all triples.<br>
 -- You can specify a context to limit deletion to that context:<br> 
 -- <code>db:delete('?s','?p','?o', 'http://context')</code> will delete all triples with that context.
-function RDFLite:delete(s, p, o, c)
+function delete(self, s, p, o, c)
 	-- convert non-nil input to internal format
 	local quad = table.map ( {s,p,o,c}, function(i,r) return r and self:internalise(r) end )
 
@@ -264,7 +264,7 @@ end
 -- age = Resource 'foaf:age'<br>
 -- db:add(john, age, "27")
 -- </code>
-function RDFLite:add(s,p,o,c)
+function add(self, s,p,o,c)
 	-- check illegal input
 	if not s['uri'] then
 		error("adding non-resource "..s.." while adding ("..s..","..p..","..o..","..c..")")
@@ -289,7 +289,7 @@ end
 --- flushes openstanding changes to underlying sqlite3.
 -- @name flush
 -- @usage <code>db:flush</code>
-function  RDFLite:flush()
+function  flush(self)
 	-- since we always write changes into sqlite3 immediately, we don't do 
 	-- anything here
 	return true
@@ -299,7 +299,7 @@ end
 -- @name load
 -- @param location path to file
 -- @usage <code>db:load('/path/to/file.nt')</code>
-function RDFLite:load(location)	
+function load(self, location)	
 	local context
 	if URI:new(location)._host then
 		context = location
@@ -340,7 +340,7 @@ end
 -- nt = "&lt;http://activerdf.org/test/age> &lt;http://www.w3.org/2000/01/rdf-schema#domain> &lt;http://www.w3.org/2000/01/rdf-schema#Resource>"<br>
 -- db:add_ntriples(nt)
 -- </code>
-function RDFLite:add_ntriples(ntriples, context)
+function add_ntriples(self, ntriples, context)
 	-- add each triple to db	
 	local insert
 	local subject, predicate, object
@@ -371,7 +371,7 @@ end
 -- q = Query.new():select('?s', '?p', '?o')<br>
 -- db:query(q)
 --</code>
-function RDFLite:query(query)
+function query(self, query)
 	
 	-- construct query clauses
 	local sql, conditions = self:translate(query)
@@ -403,7 +403,7 @@ end
 
 --- translates ActiveRDF query into internal sqlite query string.
 -- @name translate
-function RDFLite:translate(query)
+function translate(self, query)
 	local where, conditions = self:construct_where(query)
 	local sql = self:construct_select(query) .. self:construct_join(query) .. where .. self:construct_sort(query) .. self:construct_limit(query) 
 	return sql, conditions 
@@ -411,7 +411,7 @@ end
 
 -- private
 -- construct select clause
-function RDFLite:construct_select(query)
+function construct_select(self, query)
 	-- ASK queries counts the results, and return true if results > 0
 	if query._ask then
 		return "select count(*)"
@@ -436,7 +436,7 @@ function RDFLite:construct_select(query)
 end
 
 -- construct (optional) limit and offset clauses
-function RDFLite:construct_limit(query)
+function construct_limit(self, query)
 	local clause = ""
 
 	-- if no limit given, use limit -1 (no limit)
@@ -450,7 +450,7 @@ function RDFLite:construct_limit(query)
 end
 
 -- sort query results on variable clause (optionally)
-function RDFLite:construct_sort(query)
+function construct_sort(self, query)
 	local sort
 	if not table.empty(query.sort_clauses) then
 		sort = table.map(query.sort_clauses, function(i,term) return self:variable_name(query, term) end)
@@ -468,7 +468,7 @@ end
 -- only, and we should only alias tables we didnt alias yet)
 -- we should only look for one join clause in each where-clause: when we find 
 -- one, we skip the rest of the variables in this clause.
-function RDFLite:construct_join(query)
+function construct_join(self, query)
 	
 	local join_stmt = ''	
 	-- no join necessary if only one where clause given
@@ -567,7 +567,7 @@ function RDFLite:construct_join(query)
 end
 
 	-- construct where clause
-function RDFLite:construct_where(query)	
+function construct_where(self, query)	
 	table.foreach(query.where_clauses, function(i,w) 
 		w[1] = w[1] or 'nil'
 		w[2] = w[2] or 'nil'
@@ -635,7 +635,7 @@ function RDFLite:construct_where(query)
 	end
 end
 
-function RDFLite:compute_where_condition(index, subclause, reasoning)
+function compute_where_condition(self, index, subclause, reasoning)
 	local conditions = { subclause }
 
 	-- expand conditions with rdfs rules if reasoning enabled
@@ -668,7 +668,7 @@ function RDFLite:compute_where_condition(index, subclause, reasoning)
 								   end)
 end
 
-function RDFLite:subproperties(self, resource)
+function subproperties(self, resource)
 	-- compute and store subproperties of this resource 
 	-- or use earlier computed value if available
 	if not self.subprops[resource] then
@@ -687,7 +687,7 @@ function RDFLite:subproperties(self, resource)
 end
 
 -- returns sql variable name for a queryterm
-function RDFLite:variable_name(query,term)
+function variable_name(self, query,term)
 	
 	-- look up the first occurence of this term in the where clauses, and compute 
 	-- the level and s/p/o position of it
@@ -718,13 +718,13 @@ function RDFLite:variable_name(query,term)
 end
 
 -- wrap resources into ActiveRDF resources, literals into Strings
-function RDFLite:wrap(query, results)
+function wrap(self, query, results)
 	return table.map ( results, function ( i, row )
 		return table.map ( row, function ( j, result ) return self:parse(result) end )
 	end)
 end
 
-function RDFLite:parse(result)
+function parse(self, result)
 	local capture1 = Literal:match(result)
 	local capture2 = Resource:match(result)
 	
@@ -739,7 +739,7 @@ function RDFLite:parse(result)
 	end
 end
 
-function RDFLite:create_indices(params)
+function create_indices(self, params)
 	local sidx = params['sidx'] or false
 	local pidx = params['pidx'] or false
 	local oidx = params['oidx'] or false
@@ -760,7 +760,7 @@ function RDFLite:create_indices(params)
 end
 
 -- transform triple into internal format <uri> and "literal"
-function RDFLite:internalise(r)
+function internalise(self, r)
 	if type(r) == 'table' and r['uri'] then
 		return "<"..r.uri..">"
 	elseif type(r) == 'string' and string.find(r, '^?') then
@@ -771,23 +771,10 @@ function RDFLite:internalise(r)
 end
 
 -- transform resource/literal into ntriples format
-function RDFLite:serialise(r)
+function serialise(self, r)
 	if oo.instanceof ( r, RDFS.Resource ) then
 		return "<"..r.uri..">"
 	else
 		return '"'..tostring(r)..'"'
 	end
 end
-
--- it is here just because of luadoc
----------------------------------------------------------------------
---- Lua RDFLite is a small RDF datastore, based on sqlite3. 
--- Its a Lua version of rdflite for ruby. 
--- It can be used as a  datastore for Lua ActiveRDF: it acts as a adapter for ActiveRDF. 
--- Lua RDFLite does not scale well for large datasets, but is very fast for small ones. 
--- It supports the full ActiveRDF query grammar (basically, select/distinct/count with 
--- arbitrary joins in the where clauses). Unlike ruby RDFLite, Lua RDFLite does not offers 
--- full-text search over the literals yet. 
--- @release $Id$
----------------------------------------------------------------------
-module 'activerdf_rdflite.RDFLite'

@@ -1,8 +1,3 @@
--- -------------------------------------------------------------------
--- SPARQL adapter
--- @release $Id$
--- LUADOC COMMENTS ARE AT END OF THIS FILE
--- -------------------------------------------------------------------
 require 'activerdf.federation.activerdf_adapter'
 
 local oo = activerdf.oo
@@ -14,7 +9,6 @@ local tostring = tostring
 local error = error
 local ltn12 = ltn12
 local table = activerdf.table
-local module = module
 
 local ConnectionPool = activerdf.ConnectionPool
 local Query2SPARQL = activerdf.Query2SPARQL
@@ -22,6 +16,26 @@ local Query = activerdf.Query
 local RDFS = activerdf.RDFS
 local BNode = activerdf.BNode
 local ActiveRdfAdapter = activerdf.ActiveRdfAdapter
+local string = activerdf.string
+
+---------------------------------------------------------------------
+--- SPARQL adapter
+-- <br><br>SparqlAdapter is a class (simulated by <a href="http://loop.luaforge.net" target="_blank">LOOP</a>). 
+-- Every function that have the parameter <em>self</em>, is a function of instance of the class SparqlAdapter. 
+-- So it can be called using <code>obj:func()</code> or <code>SparqlAdapter.func(obj)</code>.<br>
+-- @release $Id$
+---------------------------------------------------------------------
+module 'activerdf_sparql.SparqlAdapter'
+oo.class(_M, require('activerdf.ActiveRdfAdapter'))
+
+--$activerdflog.info "loading SPARQL adapter"
+ConnectionPool.register_adapter('sparql', _M)
+
+sparql_cache = {}
+
+function get_cache()
+	return sparql_cache
+end
 
 -- --------------------------------------------------------------------------
 -- URL-encode a string (see RFC 2396)
@@ -32,21 +46,8 @@ local function escape (str)
 		function (c) return string.format ("%%%02X", string.byte(c)) end)
 	str = string.gsub (str, " ", "+")
 	return str
-end
+end	
 
-module "activerdf_sparql"
-
-SparqlAdapter = oo.class({}, ActiveRdfAdapter)
-
---$activerdflog.info "loading SPARQL adapter"
-ConnectionPool.register_adapter('sparql', SparqlAdapter)
-
-SparqlAdapter.sparql_cache = {}
-
-function SparqlAdapter.get_cache()
-	return SparqlAdapter.sparql_cache
-end
-	
 --- instantiates the connection with the SPARQL Endpoint.
 -- @name new
 -- @param params a table with the following fields: <br>
@@ -57,11 +58,11 @@ end
 -- timeout = timeout in seconds to wait for endpoint response<br>
 -- caching = true/false (defaults to false)<br>
 -- @usage <code>db = SparqlAdapter.new { url = 'http://www.example.org/sparql', engine = 'virtuoso' }</code>
-function SparqlAdapter.new(params)
-	return SparqlAdapter(params)
+function new(params)
+	return _M(params)
 end
 
-function SparqlAdapter:__init(params)
+function __init(self, params)
 	params = params or {}
 	
 	local obj =  oo.rawnew(self, {
@@ -95,7 +96,7 @@ end
 --- returns the number of triples in the datastore. (incl. possible duplicates).
 -- @name size
 -- @usage <code>db:size()</code>
-function SparqlAdapter:size()
+function size(self)
 	return table.getn(self:query(Query():select('?s','?p','?o'):where('?s','?p','?o')))
 end
 
@@ -108,7 +109,7 @@ end
 -- q = Query.new():select('?s', '?p', '?o')<br>
 -- db:query(q)
 --</code>
-function SparqlAdapter:query(query, func)	
+function query(self, query, func)	
 	local qs = Query2SPARQL.translate(query)
 	local result
 	
@@ -140,7 +141,7 @@ end
 -- @param qs a string on SPARQL query format
 -- @param header a table with http headers
 -- @param func a lua function
-function SparqlAdapter:execute_sparql_query(qs, header, func)
+function execute_sparql_query(self, qs, header, func)
 	if header == nil then
 		local header = self:header(nil)
 	end
@@ -207,30 +208,30 @@ end
 --- remove the adapter from the ConnectionPool.
 -- @name close
 -- @usage <code>db:close()</code>
-function SparqlAdapter:close()
+function close(self)
 	return ConnectionPool.remove_data_source(self)
 end
 	
 -- private
 
-function SparqlAdapter:add_to_cache(query_string, result)	
+function add_to_cache(self, query_string, result)	
 	if result and ( (type(result) == 'string' and result ~= "") or ( type(result) == 'table' and not table.empty(result) ) ) then
 		if result == "timeout" then			
-			SparqlAdapter.sparql_cache[query_string] = {}
+			sparql_cache[query_string] = {}
 		else 
 			--$activerdflog.debug "adding to sparql cache - query: #{query_string}"
-			SparqlAdapter.sparql_cache[query_string] = result
+			sparql_cache[query_string] = result
 		end
 	 end
 end
 
-function SparqlAdapter:query_cache(query_string)
-	return SparqlAdapter.sparql_cache[query_string]
+function query_cache(self, query_string)
+	return sparql_cache[query_string]
 end
 
 
 -- constructs correct HTTP header for selected query-result format
-function SparqlAdapter:header(query)
+function header(self, query)
 	if self.result_format == 'json' then
 		return { accept = 'application/sparql-results+json' }
 	elseif self.result_format == 'xml' then
@@ -241,7 +242,7 @@ function SparqlAdapter:header(query)
 end
 
 -- parse json query results into array
-function SparqlAdapter:parse_json(s)
+function parse_json(self, s)
 	
 	local JSON = require 'json'   	
 	local parsed_object = JSON.decode(s)
@@ -258,7 +259,7 @@ function SparqlAdapter:parse_json(s)
 end
   
 -- parse xml stream result into array
-function SparqlAdapter:parse_xml(s)
+function parse_xml(self, s)
 	
 	local lpeg = require 'lpeg'
 	local lpegxml = require 'activerdf_sparql.lpegxml'
@@ -276,7 +277,7 @@ function SparqlAdapter:parse_xml(s)
 	return self:parse_table_results(vars, objects)
 end
 
-function SparqlAdapter:parse_table_results(vars, objects)
+function parse_table_results(self, vars, objects)
 	local results = {}
 	local vars = vars or {}
 	local objects = objects or {}
@@ -293,7 +294,7 @@ function SparqlAdapter:parse_table_results(vars, objects)
 end
   
 -- create LOOP objects for each RDF node
-function SparqlAdapter:create_node(_type, value)
+function create_node(self, _type, value)
 	if _type == 'uri' then    
       return RDFS.Resource(value)
 	elseif _type == 'bnode' then
@@ -302,10 +303,3 @@ function SparqlAdapter:create_node(_type, value)
 		return tostring(value)
    end  
 end
-
--- it is here just because of luadoc
----------------------------------------------------------------------
---- SPARQL adapter
--- @release $Id$
----------------------------------------------------------------------
-module 'activerdf_sparql.SparqlAdapter'

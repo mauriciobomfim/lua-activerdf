@@ -1,11 +1,3 @@
----------------------------------------------------------------------
--- Represents a query on a datasource, abstract representation of SPARQL features. 
--- Query is passed to federation manager or adapter for execution on data source. 
--- <br>In all clauses, strings starting with ? represent variables:
--- <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.
--- @release $Id$
--- LUADOC COMMENTS ARE AT END OF THIS FILE
----------------------------------------------------------------------
 require 'activerdf.federation.federation_manager'
 
 local type = type
@@ -14,19 +6,30 @@ local tostring = tostring
 local tonumber = tonumber
 local pairs = pairs
 local error = error
-local module = module
-
-module "activerdf"
-
-Query = oo.class{}
+local activerdf = activerdf
+local oo = activerdf.oo
+local table = activerdf.table
+local string = activerdf.string
+local RDFS = activerdf.RDFS
+local FederationManager = activerdf.FederationManager
+---------------------------------------------------------------------
+--- Represents a query on a datasource, abstract representation of SPARQL features. 
+-- Query is passed to federation manager or adapter for execution on data source. 
+-- <br><br>Query is a class (simulated by <a href="http://loop.luaforge.net" target="_blank">LOOP</a>). Every function that have the parameter <em>self</em>, 
+-- is a function of instance of the class Query. So it can be called using <code>obj:func()</code> or <code>Query.func(obj)</code>.<br> 
+-- <br>In all clauses, strings starting with ? represent variables:
+-- <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.
+-- @release $Id$
+---------------------------------------------------------------------
+module ( 'activerdf.Query', oo.class )
 
 --- creates a new Query.
 -- @name new
-function Query.new()
-	return Query()
+function new()
+	return _M()
 end
 
-function Query:__init()  
+function __init(self)  
 	return oo.rawnew(self, { 
 		_distinct = false,
 		limit = nil,
@@ -44,7 +47,7 @@ end
 
 --- clears the select clauses.
 -- @name clear_select
-function  Query:clear_select()
+function  clear_select(self)
 	-- $activerdflog.debug "cleared select clause"
 	self.select_clauses = {}
 	self._distinct = false
@@ -54,7 +57,7 @@ end
 -- @name select
 -- @param an arbitrary list of arguments.
 -- @usage <code>q:select('?s', '?p')</code>
-function Query:select(...)
+function select(self, ...)
 	local s = {...}
 	self._select = true
 	table.foreach(s, function(index, e)
@@ -67,7 +70,7 @@ end
 
 --- adds variables to ask clause (see SPARQL specification).
 -- @name ask
-function Query:ask()
+function ask(self)
 	self._ask = true
 	return self
 end
@@ -75,23 +78,23 @@ end
 --- adds variables to select distinct clause.
 -- @name distinct
 -- @usage <code>q:distinct('?s', '?p')</code>
-function Query:distinct(...)	
+function distinct(self, ...)	
 	self._distinct = true	
 	return self:select(...)		
 end
 
-Query.select_distinct = Query.distinct
+select_distinct = distinct
 
 --- adds variables to count clause.
 -- @name count
-function Query:count(...)	
+function count(self, ...)	
 	self._count = true
 	return self:select(...)
 end
 
 --- adds sort predicates.
 -- @name sort
-function Query:sort(...)
+function sort(self, ...)
 	-- add sort clauses without duplicates
 	local s = {...}
 	table.foreach(s, function(index, clause) table.insert(self.sort_clauses, self:parametrise(clause)) end)
@@ -102,7 +105,7 @@ end
 --- adds one or more generic filters.
 -- NOTE: you have to use SPARQL syntax for variables, eg. ('?s', 'abc').
 -- @name filter
-function Query:filter(...)
+function filter(self, ...)
 	local s = {...}
 	-- add filter clauses
 	table.insert(self.filter_clauses, s)
@@ -114,7 +117,7 @@ end
 -- @name filter_regexp
 -- @param variable a string that appears in select/where clause
 -- @param regexp a string used as regular expression.
-function Query:filter_regexp(variable, regexp)	
+function filter_regexp(self, variable, regexp)	
 	if not (type(variable) == 'string') then
 		error("variable must be a string")
 	end
@@ -126,14 +129,14 @@ function Query:filter_regexp(variable, regexp)
 	return self:filter ([[regex(str(?]]..variable..[[), ]]..regexp:gsub('/','"')..[[)]])
 end
 
-Query.filter_regex = Query.filter_regexp
+filter_regex = filter_regexp
 
 --- adds operator filter one one variable.
 -- @name filter_operator
 -- @param variable a string that appears in select/where clause
 -- @param operator a SPARQL operator (e.g. '>')
 -- @param operand a SPARQL value (e.g. 15)
-function Query:filter_operator(variable, operator, operand)	
+function filter_operator(self, variable, operator, operand)	
 	if not (type(variable) == 'string') then
 		error("variable must be a string")
 	end
@@ -149,7 +152,7 @@ end
 -- @param tag a language tag
 -- @param exact true or false. If not specified, the default is false.
 -- @usage <code>q:lang('?o', 'en')</code>
-function Query:lang(variable, tag, exact)
+function lang(self, variable, tag, exact)
 	local exact = exact or false
 	if exact then
 		return self:filter("lang(?"..variable..") = '"..tag.."'")						
@@ -160,7 +163,7 @@ end
 
 --- adds reverse sorting predicates.
 -- @name reverse_sort
-function Query:reverse_sort(...)
+function reverse_sort(self, ...)
 	local s = {...}
 	-- add sort clauses without duplicates
 	table.foreach(s, function(index,clause) table.insert(self.reverse_sort_clauses, self:parametrise(clause)) end)
@@ -170,14 +173,14 @@ end
 
 --- adds limit clause (maximum number of results to return).
 -- @name limit
-function Query:limit(number)
+function limit(self, number)
 	self.limits = tonumber(number)
 	return self
 end
 
 --- adds offset clause (ignore first n results).
 -- @name offset
-function Query:offset(number)
+function offset(self, number)
 	self.offsets = tonumber(number)
 	return self
 end
@@ -190,7 +193,7 @@ end
 -- @param p predicate
 -- @param o object
 -- @param c context
-function Query:where(s,p,o,c)
+function where(self, s,p,o,c)
 	if p == '?keyword' then
 		-- treat keywords in where-clauses specially
 		self:keyword_where(s,o)
@@ -215,7 +218,7 @@ end
 
 -- adds keyword constraint to the query. You can use all Ferret query syntax in 
 -- the constraint (e.g. keyword_where('?s','eyal|benjamin')
-function Query:keyword_where(s,o)
+function keyword_where(self, s,o)
 	self.keyword = true
 	local s = self:parametrise(s)
 	if self.keywords[s] then
@@ -234,8 +237,8 @@ end
 -- @param options e.g 'flatten'
 -- @param func a function
 -- @usage <code>results = query:execute()</code>
--- @usage <code>query:execute ( nil, function(s,p,o) ... end )
-function Query:execute(options, func)
+-- @usage <code>query:execute ( nil, function(s,p,o) ... end )</code>
+function execute(self, options, func)
 	if not options then
 		options = { flatten = false }
 	end	
@@ -253,7 +256,7 @@ function Query:execute(options, func)
 end
 
 -- Returns query string depending on adapter (e.g. SPARQL, N3QL, etc.)
-function Query:__tostring()
+function __tostring(self)
 	if not ConnectionPool.read_adapters()[1] then		
 		return self:inspect()
 	else				
@@ -263,29 +266,29 @@ end
 
 --- Returns SPARQL serialisation of query.
 -- @name to_sp
-function Query:to_sp()
+function to_sp(self)
 	require 'activerdf.queryengine.query2sparql'
 	return Query2SPARQL.translate(self)
 end
 
 --  private
-function Query:parametrise(s)		
+function parametrise(self, s)		
 	if ( type(s) == 'string' and (string.sub(s,1,1) == '?' or string.find(s, '<(.*)>') ) )
 		or oo.instanceof(s, RDFS.Resource)
-		or oo.instanceof(s, Literal)
+		or oo.instanceof(s, activerdf.Literal)
 		or oo.isclass(s)
 	then
 		return s
 	elseif s == nil then
 		return nil
 	elseif type(s) == 'number' then
-		return Literal.to_ntriple(s)
+		return activerdf.Literal.to_ntriple(s)
 	else
 		return '"'..tostring(s)..'"'
 	end
 end
 
-function Query:inspect(old)
+function inspect(self, old)
 	local str = ""	
 	table.foreach(self, function(i,v)
 		if type(i) == 'string' then
@@ -293,7 +296,7 @@ function Query:inspect(old)
 		end
 		if type(v) == 'table' then
 			str = str.."{"
-			str = str..Query.inspect(v, true)
+			str = str..inspect(v, true)
 			str = str.."}, "
 		else
 			str = str..tostring(v)..", "
@@ -304,13 +307,3 @@ function Query:inspect(old)
 	end
 	return str
 end
-
--- it is here just because of luadoc
----------------------------------------------------------------------
---- Represents a query on a datasource, abstract representation of SPARQL features. 
--- Query is passed to federation manager or adapter for execution on data source. 
--- <br>In all clauses, strings starting with ? represent variables:
--- <br><br><code>Query.new():select('?s'):where('?s','?p','?o')</code>.
--- @release $Id$
----------------------------------------------------------------------
-module 'activerdf.Query'

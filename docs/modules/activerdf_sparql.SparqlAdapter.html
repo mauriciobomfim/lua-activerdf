@@ -113,7 +113,7 @@
 
 <h1>Module <code>activerdf_sparql.SparqlAdapter</code></h1>
 
-<p>SPARQL adapter</p>
+<p>SPARQL adapter <br><br>SparqlAdapter is a class (simulated by <a href="http://loop.luaforge.net" target="_blank">LOOP</a>). Every function that have the parameter <em>self</em>, is a function of instance of the class SparqlAdapter. So it can be called using <code>obj:func()</code> or <code>SparqlAdapter.func(obj)</code>.<br></p>
 
 
 
@@ -125,12 +125,12 @@
 <table class="function_list">
 
 	<tr>
-	<td class="name" nowrap><a href="#close">close</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#close">close</a>&nbsp;(self)</td>
 	<td class="summary">remove the adapter from the ConnectionPool.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#execute_sparql_query">execute_sparql_query</a>&nbsp;(qs, header, func)</td>
+	<td class="name" nowrap><a href="#execute_sparql_query">execute_sparql_query</a>&nbsp;(self, qs, header, func)</td>
 	<td class="summary">do the real work of executing the sparql query.</td>
 	</tr>
 
@@ -140,12 +140,12 @@
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#query">query</a>&nbsp;(query, func)</td>
+	<td class="name" nowrap><a href="#query">query</a>&nbsp;(self, query, func)</td>
 	<td class="summary">query datastore with query string (SPARQL), returns array with query results.</td>
 	</tr>
 
 	<tr>
-	<td class="name" nowrap><a href="#size">size</a>&nbsp;()</td>
+	<td class="name" nowrap><a href="#size">size</a>&nbsp;(self)</td>
 	<td class="summary">returns the number of triples in the datastore.</td>
 	</tr>
 
@@ -166,10 +166,19 @@
 
 
 
-<dt><a name="close"></a><strong>close</strong>&nbsp;()</dt>
+<dt><a name="close"></a><strong>close</strong>&nbsp;(self)</dt>
 <dd>
 remove the adapter from the ConnectionPool.
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
@@ -186,13 +195,17 @@ remove the adapter from the ConnectionPool.
 
 
 
-<dt><a name="execute_sparql_query"></a><strong>execute_sparql_query</strong>&nbsp;(qs, header, func)</dt>
+<dt><a name="execute_sparql_query"></a><strong>execute_sparql_query</strong>&nbsp;(self, qs, header, func)</dt>
 <dd>
 do the real work of executing the sparql query.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  qs: a string on SPARQL query format
@@ -249,13 +262,17 @@ instantiates the connection with the SPARQL Endpoint.
 
 
 
-<dt><a name="query"></a><strong>query</strong>&nbsp;(query, func)</dt>
+<dt><a name="query"></a><strong>query</strong>&nbsp;(self, query, func)</dt>
 <dd>
 query datastore with query string (SPARQL), returns array with query results. May be called with a function <em>funk</em>.
 
 
 <h3>Parameters</h3>
 <ul>
+	
+	<li>
+	  self: 
+	</li>
 	
 	<li>
 	  query: an instace of Query
@@ -282,10 +299,19 @@ query datastore with query string (SPARQL), returns array with query results. Ma
 
 
 
-<dt><a name="size"></a><strong>size</strong>&nbsp;()</dt>
+<dt><a name="size"></a><strong>size</strong>&nbsp;(self)</dt>
 <dd>
 returns the number of triples in the datastore. (incl. possible duplicates).
 
+
+<h3>Parameters</h3>
+<ul>
+	
+	<li>
+	  self: 
+	</li>
+	
+</ul>
 
 
 
