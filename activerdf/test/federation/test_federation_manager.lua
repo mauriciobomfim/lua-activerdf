@@ -7,6 +7,8 @@ local FederationManager = activerdf.FederationManager
 local Query = activerdf.Query
 local table = activerdf.table
 
+local TEST_PATH = 'lua/activerdf/test/'
+
 local function dotest(test)
 	setup()
 	test()
@@ -119,7 +121,7 @@ end
 -- this test makes no sense without two different data sources
 function test_federated_query()
 	local first_adapter = get_write_adapter()
-	first_adapter:load("lua/activerdf/test/test_person_data.nt")
+	first_adapter:load(TEST_PATH .. "test_person_data.nt")
 	local first = Query():select('?s','?p','?o'):where('?s','?p','?o'):execute()
 
 	-- results should not be empty, because then the test succeeds trivially
@@ -128,15 +130,15 @@ function test_federated_query()
 
 	ConnectionPool.clear()
 	local second_adapter = get_different_write_adapter(first_adapter)
-	second_adapter:load("lua/activerdf/test/test_person_data.nt")
+	second_adapter:load(TEST_PATH .. "test_person_data.nt")
 	second = Query():select('?s','?p','?o'):where('?s','?p','?o'):execute()
 
 	-- now we query both adapters in parallel
 	ConnectionPool.clear()
 	first_adapter = get_write_adapter()
-	first_adapter:load("lua/activerdf/test/test_person_data.nt")
+	first_adapter:load(TEST_PATH .. "test_person_data.nt")
 	second_adapter = get_different_write_adapter(first_adapter)
-	second_adapter:load("lua/activerdf/test/test_person_data.nt")
+	second_adapter:load(TEST_PATH .. "test_person_data.nt")
 	local both = Query():select('?s','?p','?o'):where('?s','?p','?o'):execute()
 	-- assert both together contain twice the sum of the separate sources
 	assert ( table.equals(table.add(first, second),  both) )
