@@ -7,15 +7,15 @@ local Literal = activerdf.Literal
 
 local nonspace = re.compile("[^ \t\b\r\f\v]")
 local space = re.compile("[ \t\b\r\f\v]")
-local _literal = re.compile( [[ { '"' ('\\"' / [^"])* '"' ('^^'nonspace+)? } ]] , { nonspace = nonspace } )
-local _bnode = re.compile ( [[ { '_:' nonspace* } ]] , { nonspace = nonspace } )
+local _literal = re.compile( [[ { '"' ('\\"' / [^"])* '"' ('^^'%nonspace+)? } ]] , { nonspace = nonspace } )
+local _bnode = re.compile ( [[ { '_:' %nonspace* } ]] , { nonspace = nonspace } )
 local _resource = re.compile ( [[ {'<'[^>]*'>'} ]] )
 
 -- constants for extracting resources/literals from sql results
-local MatchNode = re.compile ([[ l / bn / r ]], { l = _literal, bn = _bnode , r = _resource })
-local MatchBNode = re.compile ( [[ '_:' { nonspace* } ]] , { nonspace = nonspace } )
+local MatchNode = re.compile ([[ %l / %bn / %r ]], { l = _literal, bn = _bnode , r = _resource })
+local MatchBNode = re.compile ( [[ '_:' { %nonspace* } ]] , { nonspace = nonspace } )
 local MatchResource = re.compile ( [[ '<' { [^>]* } '>' ]] )
-local MatchLiteral = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ('^^<' { (!'>' nonspace)+ } '>')? ]] , { nonspace = nonspace } )
+local MatchLiteral = re.compile( [[ '"' { ('\\"' / [^"])* } '"' ('^^<' { (!'>' %nonspace)+ } '>')? ]] , { nonspace = nonspace } )
 
 ---------------------------------------------------------------------
 --- Ntriples parser
